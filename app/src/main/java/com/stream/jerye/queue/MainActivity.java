@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -41,8 +42,9 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     private RecyclerView mRecyclerView;
     private MessageAdapter mMessageAdapter;
     private List<Message> messageList;
+    private Button mPlayButton;
 
-    private static final String CLIENT_ID = "";
+    private static final String CLIENT_ID = "06a251bae8ae4881bb0022223b960c1d";
     private static final String REDIRECT_URI = "https://en.wikipedia.org/wiki/Whitelist";
     private static final int REQUEST_CODE = 42;
     private Player mPlayer;
@@ -65,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         mDatabaseReference = mFirebaseDatabase.getReference().child("messages");
         mEditText = (EditText) findViewById(R.id.edit_textbox);
         mButton = (Button) findViewById(R.id.send_button);
+        mPlayButton = (Button) findViewById(R.id.play_button);
         mRecyclerView = (RecyclerView) findViewById(R.id.text);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         messageList = new ArrayList<>();
@@ -87,7 +90,19 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
             }
         });
-
+        mPlayButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mPlayer.getPlaybackState().isPlaying){
+                    long trackPosition = mPlayer.getPlaybackState().positionMs;
+                    mPlayer.pause(null);
+                    mPlayButton.setText("Play");
+                }else{
+                    mPlayer.playUri(null, "spotify:track:2TpxZ7JUBn3uw46aR7qd6V", 0, 0);
+                    mPlayButton.setText("Pause");
+                }
+            }
+        });
 
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -185,7 +200,8 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     @Override
     public void onLoggedIn() {
         Log.d("MainActivity", "User logged in");
-        mPlayer.playUri(null, "spotify:track:2TpxZ7JUBn3uw46aR7qd6V", 0, 0);
+        Toast.makeText(this, "You are now logged in", Toast.LENGTH_SHORT).show();
+
     }
 
     @Override
