@@ -1,4 +1,4 @@
-package com.example.jerye.queue;
+package com.stream.jerye.queue;
 
 /**
  * Created by jerye on 6/12/2017.

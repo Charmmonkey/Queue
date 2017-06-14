@@ -19,6 +19,16 @@ android {
     }
 }
 
+repositories {
+    mavenCentral()
+    maven { url "https://jitpack.io" }
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
@@ -32,7 +42,9 @@ dependencies {
     compile 'com.google.firebase:firebase-core:11.0.0'
     compile 'com.google.firebase:firebase-database:11.0.0'
 
+    compile 'com.github.kaaes:spotify-web-api-android:0.4.1'
     compile 'com.spotify.android:auth:1.0.0-alpha'
+    compile 'com.github.spotify:android-auth:9425c6a140'
     compile 'com.spotify.sdk:spotify-player-24-noconnect-2.20b@aar'
 }
 apply plugin: 'com.google.gms.google-services'

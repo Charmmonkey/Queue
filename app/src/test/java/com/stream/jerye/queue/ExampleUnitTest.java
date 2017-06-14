@@ -1,4 +1,4 @@
-package com.example.jerye.queue;
+package com.stream.jerye.queue;
 
 import org.junit.Test;
 
