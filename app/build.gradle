@@ -46,6 +46,8 @@ dependencies {
     compile 'com.spotify.android:auth:1.0.0-alpha'
     compile 'com.github.spotify:android-auth:9425c6a140'
     compile 'com.spotify.sdk:spotify-player-24-noconnect-2.20b@aar'
+
+    compile 'com.squareup.picasso:picasso:2.5.2'
 }
 apply plugin: 'com.google.gms.google-services'
 
