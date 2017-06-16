@@ -1,4 +1,4 @@
-package com.stream.jerye.queue;
+package com.stream.jerye.queue.MusicPage;
 
 import android.support.annotation.Nullable;
 

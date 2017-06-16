@@ -1,4 +1,4 @@
-package com.stream.jerye.queue;
+package com.stream.jerye.queue.MusicPage;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+import com.stream.jerye.queue.R;
 
 import java.util.ArrayList;
 import java.util.List;

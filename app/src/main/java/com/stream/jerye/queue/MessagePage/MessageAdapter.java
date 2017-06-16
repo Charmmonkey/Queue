@@ -1,4 +1,4 @@
-package com.stream.jerye.queue;
+package com.stream.jerye.queue.MessagePage;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.stream.jerye.queue.R;
 
 import java.util.List;
 

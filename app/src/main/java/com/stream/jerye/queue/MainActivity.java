@@ -29,6 +29,13 @@ import com.spotify.sdk.android.player.Player;
 import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.player.SpotifyPlayer;
+import com.stream.jerye.queue.MessagePage.Message;
+import com.stream.jerye.queue.MessagePage.MessageAdapter;
+import com.stream.jerye.queue.MusicPage.ResultListScrollListener;
+import com.stream.jerye.queue.MusicPage.Search;
+import com.stream.jerye.queue.MusicPage.SearchPresenter;
+import com.stream.jerye.queue.MusicPage.SearchResultsAdapter;
+import com.stream.jerye.queue.MusicPage.SpotifyTrack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,9 +46,9 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     private EditText mEditText;
     private Button mButton;
     private FirebaseDatabase mFirebaseDatabase;
-    private DatabaseReference mDatabaseReference;
+    private DatabaseReference mDatabaseMessagesReference, mDatabaseTracksReference;
     private String mUsername;
-    private ChildEventListener mChildEventListener;
+    private ChildEventListener mMessagesChildEventListener, mTracksChildEventListener;
     private RecyclerView mRecyclerView;
     private MessageAdapter mMessageAdapter;
     private List<Message> messageList;
@@ -90,7 +97,8 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
 
         mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mDatabaseReference = mFirebaseDatabase.getReference().child("messages");
+        mDatabaseMessagesReference = mFirebaseDatabase.getReference().child("messages");
+        mDatabaseTracksReference = mFirebaseDatabase.getReference().child("tracks");
         mEditText = (EditText) findViewById(R.id.edit_textbox);
         mButton = (Button) findViewById(R.id.send_button);
         mPlayButton = (Button) findViewById(R.id.play_button);
@@ -135,12 +143,12 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             public void onClick(View v) {
                 Message message = new Message(mEditText.getText().toString(), mUsername, null);
 
-                mDatabaseReference.push().setValue(message);
+                mDatabaseMessagesReference.push().setValue(message);
                 mEditText.setText("");
             }
         });
 
-        mChildEventListener = new ChildEventListener() {
+        mMessagesChildEventListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Message message = dataSnapshot.getValue(Message.class);
@@ -168,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
             }
         };
-        mDatabaseReference.addChildEventListener(mChildEventListener);
+        mDatabaseMessagesReference.addChildEventListener(mMessagesChildEventListener);
 
 
         mActionListener = new SearchPresenter(this, this);
@@ -224,6 +232,12 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         mAdapter.addData(items);
     }
 
+    @Override
+    public void onTrackSelected(String trackUrl) {
+        Log.d("MainActivity.java", "onTrackSelected");
+        SpotifyTrack selectedTrack = new SpotifyTrack(trackUrl);
+        mDatabaseTracksReference.push().setValue(selectedTrack);
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {

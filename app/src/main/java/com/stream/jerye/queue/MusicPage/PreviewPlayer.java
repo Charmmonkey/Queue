@@ -1,4 +1,4 @@
-package com.stream.jerye.queue;
+package com.stream.jerye.queue.MusicPage;
 
 import android.media.AudioManager;
 import android.media.MediaPlayer;

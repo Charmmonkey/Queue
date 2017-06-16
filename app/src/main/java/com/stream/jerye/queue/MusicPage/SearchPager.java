@@ -1,4 +1,4 @@
-package com.stream.jerye.queue;
+package com.stream.jerye.queue.MusicPage;
 
 import java.util.HashMap;
 import java.util.List;

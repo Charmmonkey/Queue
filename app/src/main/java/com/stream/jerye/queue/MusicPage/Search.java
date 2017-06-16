@@ -1,4 +1,4 @@
-package com.stream.jerye.queue;
+package com.stream.jerye.queue.MusicPage;
 
 import java.util.List;
 
@@ -10,6 +10,8 @@ public class Search {
         void reset();
 
         void addData(List<Track> items);
+
+        void onTrackSelected(String trackUrl);
     }
 
     public interface ActionListener {

@@ -34,20 +34,21 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+
+
+
+    compile 'com.spotify.sdk:spotify-player-24-noconnect-2.20b@aar'
+
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:recyclerview-v7:25.3.1'
-
-    testCompile 'junit:junit:4.12'
-
     compile 'com.google.firebase:firebase-core:11.0.0'
     compile 'com.google.firebase:firebase-database:11.0.0'
-
     compile 'com.github.kaaes:spotify-web-api-android:0.4.1'
     compile 'com.spotify.android:auth:1.0.0-alpha'
     compile 'com.github.spotify:android-auth:9425c6a140'
-    compile 'com.spotify.sdk:spotify-player-24-noconnect-2.20b@aar'
-
     compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.android.support:support-v4:25.3.1'
+    testCompile 'junit:junit:4.12'
 }
 apply plugin: 'com.google.gms.google-services'
 

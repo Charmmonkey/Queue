@@ -1,4 +1,4 @@
-package com.stream.jerye.queue;
+package com.stream.jerye.queue.MusicPage;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -121,7 +121,9 @@ public class SearchPresenter implements Search.ActionListener {
         String previewUrl = item.preview_url;
 
         if (previewUrl == null) {
-            logMessage("Track doesn't have a preview");
+            String track_url = item.uri;
+            logMessage(track_url);
+            mView.onTrackSelected(item.uri);
             return;
         }
 
@@ -136,6 +138,7 @@ public class SearchPresenter implements Search.ActionListener {
         } else {
             mPlayer.resume();
         }
+
     }
 
     private void logError(String msg) {
