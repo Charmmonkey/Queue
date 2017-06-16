@@ -1,60 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    tools:context="com.stream.jerye.queue.MainActivity">
 
-    <android.support.v7.widget.SearchView
-        android:id="@+id/search_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-
-    </android.support.v7.widget.SearchView>
-
-    <android.support.v7.widget.RecyclerView
-        android:layout_below="@id/search_view"
-        android:id="@+id/search_results"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="vertical"/>
-
-    <android.support.v7.widget.RecyclerView
-        android:layout_below="@id/search_results"
-        android:id="@+id/text"
-        android:layout_width="match_parent"
-        android:layout_height="100dp" />
-
-
-    <Button
-        android:id="@+id/play_button"
+    <android.support.v4.view.ViewPager
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Play"
-        android:layout_below="@id/text"/>
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal"
-        android:weightSum="5">
-
-        <EditText
-            android:id="@+id/edit_textbox"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="4"
-            android:textColor="@android:color/darker_gray" />
-
-        <Button
-            android:id="@+id/send_button"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="send" />
-
-    </LinearLayout>
-
-</RelativeLayout>
+        android:id="@+id/view_pager"/>
+</FrameLayout>
