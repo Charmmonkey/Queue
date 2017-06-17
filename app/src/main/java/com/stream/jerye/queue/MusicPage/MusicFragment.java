@@ -1,9 +1,13 @@
 package com.stream.jerye.queue.MusicPage;
 
 
+import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,9 +26,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
 import com.spotify.sdk.android.player.Error;
-import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.Spotify;
-import com.spotify.sdk.android.player.SpotifyPlayer;
 import com.stream.jerye.queue.R;
 
 import java.util.List;
@@ -34,7 +36,7 @@ import kaaes.spotify.webapi.android.models.Track;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MusicFragment extends Fragment implements SpotifyPlayer.NotificationCallback, ConnectionStateCallback, Search.View {
+public class MusicFragment extends Fragment implements ConnectionStateCallback, Search.View, MusicQueueListener {
     private LinearLayoutManager mResultsLayoutManager = new LinearLayoutManager(getContext()), mQueueLayoutManager = new LinearLayoutManager(getContext());
     private ScrollListener mScrollListener = new ScrollListener(mResultsLayoutManager);
     private SearchResultsAdapter mSearchResultsAdapter;
@@ -46,13 +48,26 @@ public class MusicFragment extends Fragment implements SpotifyPlayer.Notificatio
     private FirebaseDatabase mFirebaseDatabase;
     private View mRootView;
     private String mCurrentTrack;
-
-
-    private static final String KEY_CURRENT_QUERY = "CURRENT_QUERY";
-
-    private Search.ActionListener mActionListener;
-
     private Player mPlayer;
+    private static final String KEY_CURRENT_QUERY = "CURRENT_QUERY";
+    private Search.ActionListener mActionListener;
+    private String TAG = "MainActivity.java";
+    private String mSpotifyAccessToken;
+    private ServiceConnection mServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.d(TAG, "Service Connected");
+            mPlayer = ((PlayerService.PlayerBinder) service).getService(getContext(),MusicFragment.this, mSpotifyAccessToken);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.d(TAG, "Service DisConnected");
+
+            mPlayer = null;
+        }
+    };
+
 
     public MusicFragment() {
         // Required empty public constructor
@@ -88,7 +103,21 @@ public class MusicFragment extends Fragment implements SpotifyPlayer.Notificatio
             @Override
             public void onClick(View v) {
 
+                if (mPlayer == null) {
+                    Log.d("MainActivity.java", "mPlayer is null");
+                    return;
+                }
 
+                String currentTrackUrl = mQueueMusicAdapter.peek();
+
+//                currentTrackUrl == null || !currentTrackUrl.equals(currentTrackUrl)
+                if (!mPlayer.isPlaying()) {
+                    mPlayer.play(currentTrackUrl);
+                } else if (mPlayer.isPlaying()) {
+                    mPlayer.pause();
+                } else {
+                    mPlayer.resume();
+                }
 
 //                if (mPlayer.getPlaybackState().isPlaying) {
 //                    long trackPosition = mPlayer.getPlaybackState().positionMs;
@@ -145,7 +174,6 @@ public class MusicFragment extends Fragment implements SpotifyPlayer.Notificatio
 
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseTracksReference = mFirebaseDatabase.getReference().child("tracks");
-
         mDatabaseTracksReference.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -177,7 +205,6 @@ public class MusicFragment extends Fragment implements SpotifyPlayer.Notificatio
         });
         SharedPreferences prefs = getContext().getSharedPreferences(getContext().getPackageName(), Context.MODE_PRIVATE);
         String mToken = prefs.getString("token", null);
-        Log.d("MainActivity.java", "" + mToken);
 
         mActionListener = new SearchPresenter(getContext(), this);
         mActionListener.init(mToken);
@@ -187,6 +214,9 @@ public class MusicFragment extends Fragment implements SpotifyPlayer.Notificatio
             String currentQuery = savedInstanceState.getString(KEY_CURRENT_QUERY);
             mActionListener.search(currentQuery);
         }
+
+        getContext().bindService(PlayerService.getIntent(getContext()), mServiceConnection, Activity.BIND_AUTO_CREATE);
+
     }
 
     @Override
@@ -263,24 +293,16 @@ public class MusicFragment extends Fragment implements SpotifyPlayer.Notificatio
         super.onDestroyView();
     }
 
-
     @Override
-    public void onPlaybackEvent(PlayerEvent playerEvent) {
-        Log.d("MainActivity", "Playback event received: " + playerEvent.name());
-        switch (playerEvent) {
-            // Handle event type as necessary
-            default:
-                break;
-        }
+    public void dequeue() {
+        mQueueMusicAdapter.dequeue();
     }
 
     @Override
-    public void onPlaybackError(Error error) {
-        Log.d("MainActivity", "Playback error received: " + error.name());
-        switch (error) {
-            // Handle error type as necessary
-            default:
-                break;
-        }
+    public void onStop() {
+        super.onStop();
+
+        getContext().unbindService(mServiceConnection);
+
     }
 }

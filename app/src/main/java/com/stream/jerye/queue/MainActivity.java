@@ -11,7 +11,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import com.google.firebase.database.FirebaseDatabase;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
@@ -19,8 +18,7 @@ import com.stream.jerye.queue.MessagePage.MessageFragment;
 import com.stream.jerye.queue.MusicPage.MusicFragment;
 
 public class MainActivity extends AppCompatActivity {
-    private FirebaseDatabase mFirebaseDatabase;
-    private static final String CLIENT_ID = "06a251bae8ae4881bb0022223b960c1d";
+    public static final String CLIENT_ID = "06a251bae8ae4881bb0022223b960c1d";
     private static final String REDIRECT_URI = "https://en.wikipedia.org/wiki/Whitelist";
     private static final int REQUEST_CODE = 42;
     private ViewPager mPager;
@@ -32,7 +30,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.main_activity_layout);
 
         mPager = (ViewPager) findViewById(R.id.view_pager);
-        mFirebaseDatabase = FirebaseDatabase.getInstance();
 
         AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
                 AuthenticationResponse.Type.TOKEN,

@@ -10,14 +10,15 @@ import android.support.annotation.Nullable;
 public class PlayerService extends Service {
 
     private final IBinder mBinder = new PlayerBinder();
-    private Player mPlayer = new PreviewPlayer();
+    private Player mPlayer;
 
     public static Intent getIntent(Context context) {
         return new Intent(context, PlayerService.class);
     }
 
     public class PlayerBinder extends Binder {
-        public Player getService() {
+        public Player getService(Context context, MusicQueueListener musicQueueListener, String spotifyAccessToken) {
+            mPlayer = new MultiMediaPlayer(context, musicQueueListener, spotifyAccessToken);
             return mPlayer;
         }
     }

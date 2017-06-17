@@ -1,10 +1,6 @@
 package com.stream.jerye.queue.MusicPage;
 
-import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.ServiceConnection;
-import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
@@ -26,18 +22,6 @@ public class SearchPresenter implements Search.ActionListener {
     private SearchPager mSearchPager;
     private SearchPager.CompleteListener mSearchListener;
 
-    private Player mPlayer;
-    private ServiceConnection mServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            mPlayer = ((PlayerService.PlayerBinder) service).getService();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mPlayer = null;
-        }
-    };
 
     public SearchPresenter(Context context, Search.View view) {
         mContext = context;
@@ -59,7 +43,6 @@ public class SearchPresenter implements Search.ActionListener {
 
         mSearchPager = new SearchPager(mSpotifyApi.getService());
 
-        mContext.bindService(PlayerService.getIntent(mContext), mServiceConnection, Activity.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -91,7 +74,6 @@ public class SearchPresenter implements Search.ActionListener {
 
     @Override
     public void destroy() {
-        mContext.unbindService(mServiceConnection);
     }
 
     @Override
@@ -118,25 +100,14 @@ public class SearchPresenter implements Search.ActionListener {
 
     @Override
     public void selectTrack(Track item) {
-        String previewUrl = item.preview_url;
+        String uri = item.uri;
 
-        if (previewUrl == null) {
-            String track_url = item.uri;
-            logMessage(track_url);
-            mView.onTrackSelected(item.uri);
+        if (uri == null) {
+            logMessage(uri);
+            mView.onTrackSelected(uri);
             return;
-        }
-
-        if (mPlayer == null) return;
-
-        String currentTrackUrl = mPlayer.getCurrentTrack();
-
-        if (currentTrackUrl == null || !currentTrackUrl.equals(previewUrl)) {
-            mPlayer.play(previewUrl);
-        } else if (mPlayer.isPlaying()) {
-            mPlayer.pause();
-        } else {
-            mPlayer.resume();
+        }else{
+            Toast.makeText(mContext, "Could not find song", Toast.LENGTH_SHORT).show();
         }
 
     }
