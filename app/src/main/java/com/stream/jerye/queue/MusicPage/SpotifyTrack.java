@@ -7,6 +7,9 @@ package com.stream.jerye.queue.MusicPage;
 public class SpotifyTrack {
     private String trackUrl;
 
+    public SpotifyTrack() {
+    }
+
     public SpotifyTrack(String trackUrl){
         this.trackUrl = trackUrl;
 

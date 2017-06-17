@@ -84,6 +84,11 @@ public class PreviewPlayer implements Player, MediaPlayer.OnCompletionListener {
         return mCurrentTrack;
     }
 
+    @Override
+    public void enqueue() {
+
+    }
+
     private void createMediaPlayer(String url) throws IOException {
         mMediaPlayer = new MediaPlayer();
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -92,4 +97,6 @@ public class PreviewPlayer implements Player, MediaPlayer.OnCompletionListener {
         mMediaPlayer.setOnCompletionListener(this);
         mMediaPlayer.prepareAsync();
     }
+
+
 }

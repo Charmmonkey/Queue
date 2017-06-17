@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.google.firebase.database.FirebaseDatabase;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
@@ -48,27 +49,18 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
+        Log.d("MainActivity.java", "onActivityResult: " + requestCode);
 
         if (requestCode == REQUEST_CODE) {
+            Log.d("MainActivity.java", "requestcode");
+
             AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
             if (response.getType() == AuthenticationResponse.Type.TOKEN) {
+                Log.d("MainActivity.java", "type: " + response.getType());
+
                 String mToken = response.getAccessToken();
                 SharedPreferences prefs = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
-                prefs.edit().putString("token", mToken);
-//                Config playerConfig = new Config(this, mToken, CLIENT_ID);
-//                Spotify.getPlayer(playerConfig, this, new SpotifyPlayer.InitializationObserver() {
-//                    @Override
-//                    public void onInitialized(SpotifyPlayer spotifyPlayer) {
-//                        mPlayer = spotifyPlayer;
-//                        mPlayer.addConnectionStateCallback(MainActivity.this);
-//                        mPlayer.addNotificationCallback(MainActivity.this);
-//                    }
-//
-//                    @Override
-//                    public void onError(Throwable throwable) {
-//                        Log.e("MainActivity", "Could not initialize player: " + throwable.getMessage());
-//                    }
-//                });
+                prefs.edit().putString("token", mToken).apply();
             }
         }
     }

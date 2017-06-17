@@ -15,11 +15,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
 import com.spotify.sdk.android.player.Error;
-import com.spotify.sdk.android.player.Player;
 import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.player.SpotifyPlayer;
@@ -33,15 +35,17 @@ import kaaes.spotify.webapi.android.models.Track;
  * A simple {@link Fragment} subclass.
  */
 public class MusicFragment extends Fragment implements SpotifyPlayer.NotificationCallback, ConnectionStateCallback, Search.View {
-    private LinearLayoutManager mLayoutManager = new LinearLayoutManager(getContext());
-    private ScrollListener mScrollListener = new ScrollListener(mLayoutManager);
-    private SearchResultsAdapter mAdapter;
+    private LinearLayoutManager mResultsLayoutManager = new LinearLayoutManager(getContext()), mQueueLayoutManager = new LinearLayoutManager(getContext());
+    private ScrollListener mScrollListener = new ScrollListener(mResultsLayoutManager);
+    private SearchResultsAdapter mSearchResultsAdapter;
+    private MusicQueueAdapter mQueueMusicAdapter;
     private DatabaseReference mDatabaseTracksReference;
     private SearchView mSearchView;
-    private RecyclerView mMusicResultsList;
+    private RecyclerView mMusicResultsList, mMusicQueueList;
     private Button mPlayButton;
     private FirebaseDatabase mFirebaseDatabase;
     private View mRootView;
+    private String mCurrentTrack;
 
 
     private static final String KEY_CURRENT_QUERY = "CURRENT_QUERY";
@@ -83,14 +87,17 @@ public class MusicFragment extends Fragment implements SpotifyPlayer.Notificatio
         mPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mPlayer.getPlaybackState().isPlaying) {
-                    long trackPosition = mPlayer.getPlaybackState().positionMs;
-                    mPlayer.pause(null);
-                    mPlayButton.setText("Play");
-                } else {
-                    mPlayer.playUri(null, "spotify:track:2TpxZ7JUBn3uw46aR7qd6V", 0, 0);
-                    mPlayButton.setText("Pause");
-                }
+
+
+
+//                if (mPlayer.getPlaybackState().isPlaying) {
+//                    long trackPosition = mPlayer.getPlaybackState().positionMs;
+//                    mPlayer.pause(null);
+//                    mPlayButton.setText("Play");
+//                } else {
+//                    mPlayer.playUri(null, "spotify:track:2TpxZ7JUBn3uw46aR7qd6V", 0, 0);
+//                    mPlayButton.setText("Pause");
+//                }
             }
         });
 
@@ -112,7 +119,7 @@ public class MusicFragment extends Fragment implements SpotifyPlayer.Notificatio
         mMusicResultsList = (RecyclerView) mRootView.findViewById(R.id.search_results);
 
         // Setup search results list
-        mAdapter = new SearchResultsAdapter(getContext(), new SearchResultsAdapter.ItemSelectedListener() {
+        mSearchResultsAdapter = new SearchResultsAdapter(getContext(), new SearchResultsAdapter.ItemSelectedListener() {
             @Override
             public void onItemSelected(View itemView, Track item) {
                 mActionListener.selectTrack(item);
@@ -120,9 +127,14 @@ public class MusicFragment extends Fragment implements SpotifyPlayer.Notificatio
         });
 
         mMusicResultsList.setHasFixedSize(true);
-        mMusicResultsList.setLayoutManager(mLayoutManager);
-        mMusicResultsList.setAdapter(mAdapter);
+        mMusicResultsList.setLayoutManager(mResultsLayoutManager);
+        mMusicResultsList.setAdapter(mSearchResultsAdapter);
         mMusicResultsList.addOnScrollListener(mScrollListener);
+
+        mMusicQueueList = (RecyclerView) mRootView.findViewById(R.id.music_queue);
+        mMusicQueueList.setLayoutManager(mQueueLayoutManager);
+        mQueueMusicAdapter = new MusicQueueAdapter(getContext());
+        mMusicQueueList.setAdapter(mQueueMusicAdapter);
 
         return mRootView;
     }
@@ -134,9 +146,38 @@ public class MusicFragment extends Fragment implements SpotifyPlayer.Notificatio
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseTracksReference = mFirebaseDatabase.getReference().child("tracks");
 
+        mDatabaseTracksReference.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                SpotifyTrack spotifyTrack = dataSnapshot.getValue(SpotifyTrack.class);
+                mCurrentTrack = spotifyTrack.getTrack();
+                mQueueMusicAdapter.enqueue(mCurrentTrack);
 
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
         SharedPreferences prefs = getContext().getSharedPreferences(getContext().getPackageName(), Context.MODE_PRIVATE);
         String mToken = prefs.getString("token", null);
+        Log.d("MainActivity.java", "" + mToken);
 
         mActionListener = new SearchPresenter(getContext(), this);
         mActionListener.init(mToken);
@@ -151,12 +192,12 @@ public class MusicFragment extends Fragment implements SpotifyPlayer.Notificatio
     @Override
     public void reset() {
         mScrollListener.reset();
-        mAdapter.clearData();
+        mSearchResultsAdapter.clearData();
     }
 
     @Override
     public void addData(List<Track> items) {
-        mAdapter.addData(items);
+        mSearchResultsAdapter.addData(items);
     }
 
     @Override

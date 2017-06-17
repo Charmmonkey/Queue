@@ -16,4 +16,6 @@ public interface Player {
     String getCurrentTrack();
 
     void release();
+
+    void enqueue();
 }
