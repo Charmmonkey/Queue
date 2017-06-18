@@ -35,17 +35,16 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
+//    compile 'com.spotify.sdk:spotify-player-24-noconnect-2.20b@aar'
+    compile 'com.spotify.sdk:spotify-player:1.0.0-beta13@aar'
+    compile 'com.spotify.sdk:spotify-auth:1.0.0-beta13@aar'
 
-
-    compile 'com.spotify.sdk:spotify-player-24-noconnect-2.20b@aar'
 
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:recyclerview-v7:25.3.1'
     compile 'com.google.firebase:firebase-core:11.0.0'
     compile 'com.google.firebase:firebase-database:11.0.0'
     compile 'com.github.kaaes:spotify-web-api-android:0.4.1'
-    compile 'com.spotify.android:auth:1.0.0-alpha'
-    compile 'com.github.spotify:android-auth:9425c6a140'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.android.support:support-v4:25.3.1'
     testCompile 'junit:junit:4.12'

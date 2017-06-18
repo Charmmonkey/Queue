@@ -2,7 +2,7 @@ package com.stream.jerye.queue.MusicPage;
 
 import android.support.annotation.Nullable;
 
-public interface Player {
+public interface QueuePlayer {
 
     void play(String url);
 
@@ -19,5 +19,7 @@ public interface Player {
 
     void release();
 
-    void enqueue();
+    void nextTrack(String url);
+
+
 }

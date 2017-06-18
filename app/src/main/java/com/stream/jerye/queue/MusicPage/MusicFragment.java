@@ -33,7 +33,7 @@ import kaaes.spotify.webapi.android.models.Track;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MusicFragment extends Fragment implements Search.View, MusicQueueListener{
+public class MusicFragment extends Fragment implements Search.View, MusicQueueListener {
     private LinearLayoutManager mResultsLayoutManager = new LinearLayoutManager(getContext()), mQueueLayoutManager = new LinearLayoutManager(getContext());
     private ScrollListener mScrollListener = new ScrollListener(mResultsLayoutManager);
     private SearchResultsAdapter mSearchResultsAdapter;
@@ -41,12 +41,12 @@ public class MusicFragment extends Fragment implements Search.View, MusicQueueLi
     private DatabaseReference mDatabaseTracksReference;
     private SearchView mSearchView;
     private RecyclerView mMusicResultsList, mMusicQueueList;
-    private Button mPlayButton;
+    private Button mPlayButton, mPreviousbutton, mNextButton;
     private FirebaseDatabase mFirebaseDatabase;
     private View mRootView;
     private com.spotify.sdk.android.player.Player mSpotifyPlayer;
     private String mCurrentTrack;
-    private Player mPlayer;
+    private QueuePlayer mPlayer;
     private static final String KEY_CURRENT_QUERY = "CURRENT_QUERY";
     private Search.ActionListener mActionListener;
     private String TAG = "MainActivity.java";
@@ -112,23 +112,34 @@ public class MusicFragment extends Fragment implements Search.View, MusicQueueLi
 
                 String currentTrackUrl = mQueueMusicAdapter.peek();
 
-//                currentTrackUrl == null || !currentTrackUrl.equals(currentTrackUrl)
+
                 if (mPlayer.isPaused()) {
                     mPlayer.resume();
+                    mPlayButton.setText("Pause");
                 } else if (mPlayer.isPlaying()) {
                     mPlayer.pause();
+                    mPlayButton.setText("Play");
+
                 } else {
                     mPlayer.play(currentTrackUrl);
+                    mPlayer.nextTrack(mQueueMusicAdapter.peekMore());
+                    mPlayButton.setText("Pause");
+                }
+            }
+        });
+
+        mNextButton = (Button) mRootView.findViewById(R.id.next_button);
+        mNextButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("MainActivity.java", "Next button clicked");
+
+                if (mPlayer == null) {
+                    Log.d("MainActivity.java", "mPlayer is null");
+                    return;
                 }
 
-//                if (mPlayer.getPlaybackState().isPlaying) {
-//                    long trackPosition = mPlayer.getPlaybackState().positionMs;
-//                    mPlayer.pause(null);
-//                    mPlayButton.setText("Play");
-//                } else {
-//                    mPlayer.playUri(null, "spotify:track:2TpxZ7JUBn3uw46aR7qd6V", 0, 0);
-//                    mPlayButton.setText("Pause");
-//                }
+
             }
         });
 
@@ -269,6 +280,7 @@ public class MusicFragment extends Fragment implements Search.View, MusicQueueLi
 
     @Override
     public void dequeue() {
+        Log.d("MainActivity.java", "QueueListener dequeue");
         mQueueMusicAdapter.dequeue();
     }
 
