@@ -17,15 +17,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.spotify.sdk.android.player.ConnectionStateCallback;
-import com.spotify.sdk.android.player.Error;
 import com.spotify.sdk.android.player.Spotify;
 import com.stream.jerye.queue.R;
 
@@ -36,7 +33,7 @@ import kaaes.spotify.webapi.android.models.Track;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MusicFragment extends Fragment implements ConnectionStateCallback, Search.View, MusicQueueListener {
+public class MusicFragment extends Fragment implements Search.View, MusicQueueListener{
     private LinearLayoutManager mResultsLayoutManager = new LinearLayoutManager(getContext()), mQueueLayoutManager = new LinearLayoutManager(getContext());
     private ScrollListener mScrollListener = new ScrollListener(mResultsLayoutManager);
     private SearchResultsAdapter mSearchResultsAdapter;
@@ -47,17 +44,19 @@ public class MusicFragment extends Fragment implements ConnectionStateCallback, 
     private Button mPlayButton;
     private FirebaseDatabase mFirebaseDatabase;
     private View mRootView;
+    private com.spotify.sdk.android.player.Player mSpotifyPlayer;
     private String mCurrentTrack;
     private Player mPlayer;
     private static final String KEY_CURRENT_QUERY = "CURRENT_QUERY";
     private Search.ActionListener mActionListener;
     private String TAG = "MainActivity.java";
     private String mSpotifyAccessToken;
+
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.d(TAG, "Service Connected");
-            mPlayer = ((PlayerService.PlayerBinder) service).getService(getContext(),MusicFragment.this, mSpotifyAccessToken);
+            mPlayer = ((PlayerService.PlayerBinder) service).getService(getContext(), MusicFragment.this, mSpotifyAccessToken);
         }
 
         @Override
@@ -103,6 +102,9 @@ public class MusicFragment extends Fragment implements ConnectionStateCallback, 
             @Override
             public void onClick(View v) {
 
+                Log.d(TAG, "play button clicked");
+
+
                 if (mPlayer == null) {
                     Log.d("MainActivity.java", "mPlayer is null");
                     return;
@@ -111,12 +113,12 @@ public class MusicFragment extends Fragment implements ConnectionStateCallback, 
                 String currentTrackUrl = mQueueMusicAdapter.peek();
 
 //                currentTrackUrl == null || !currentTrackUrl.equals(currentTrackUrl)
-                if (!mPlayer.isPlaying()) {
-                    mPlayer.play(currentTrackUrl);
+                if (mPlayer.isPaused()) {
+                    mPlayer.resume();
                 } else if (mPlayer.isPlaying()) {
                     mPlayer.pause();
                 } else {
-                    mPlayer.resume();
+                    mPlayer.play(currentTrackUrl);
                 }
 
 //                if (mPlayer.getPlaybackState().isPlaying) {
@@ -204,10 +206,10 @@ public class MusicFragment extends Fragment implements ConnectionStateCallback, 
             }
         });
         SharedPreferences prefs = getContext().getSharedPreferences(getContext().getPackageName(), Context.MODE_PRIVATE);
-        String mToken = prefs.getString("token", null);
+        mSpotifyAccessToken = prefs.getString("token", null);
 
         mActionListener = new SearchPresenter(getContext(), this);
-        mActionListener.init(mToken);
+        mActionListener.init(mSpotifyAccessToken);
 
         // If Activity was recreated wit active search restore it
         if (savedInstanceState != null) {
@@ -235,34 +237,6 @@ public class MusicFragment extends Fragment implements ConnectionStateCallback, 
         Log.d("MainActivity.java", "onTrackSelected");
         SpotifyTrack selectedTrack = new SpotifyTrack(trackUrl);
         mDatabaseTracksReference.push().setValue(selectedTrack);
-    }
-
-
-    @Override
-    public void onLoggedIn() {
-        Log.d("MainActivity", "User logged in");
-        Toast.makeText(getContext(), "You are now logged in", Toast.LENGTH_SHORT).show();
-
-    }
-
-    @Override
-    public void onLoggedOut() {
-        Log.d("MainActivity", "User logged out");
-    }
-
-    @Override
-    public void onLoginFailed(Error error) {
-
-    }
-
-    @Override
-    public void onTemporaryError() {
-        Log.d("MainActivity", "Temporary error occurred");
-    }
-
-    @Override
-    public void onConnectionMessage(String message) {
-        Log.d("MainActivity", "Received connection message: " + message);
     }
 
 
@@ -305,4 +279,6 @@ public class MusicFragment extends Fragment implements ConnectionStateCallback, 
         getContext().unbindService(mServiceConnection);
 
     }
+
+
 }

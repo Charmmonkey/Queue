@@ -64,4 +64,9 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         mItems.remove(0);
         notifyItemRemoved(0);
     }
+
+    public void remove(int position){
+        mItems.remove(position);
+        notifyItemRemoved(position);
+    }
 }

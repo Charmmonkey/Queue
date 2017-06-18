@@ -12,6 +12,8 @@ public interface Player {
 
     boolean isPlaying();
 
+    boolean isPaused();
+
     @Nullable
     String getCurrentTrack();
 
