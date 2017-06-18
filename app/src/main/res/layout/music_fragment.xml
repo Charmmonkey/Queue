@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:weightSum="2">
 
     <android.support.v7.widget.SearchView
         android:id="@+id/search_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        >
+        android:layout_height="wrap_content">
 
 
     </android.support.v7.widget.SearchView>
@@ -18,8 +18,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_below="@id/search_view"
-        android:scrollbars="vertical"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:scrollbars="vertical" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/music_queue"
@@ -29,30 +29,37 @@
 
     </android.support.v7.widget.RecyclerView>
 
+    <TextView
+        android:id="@+id/music_current"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="current"/>
+
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
+
         <Button
+            android:id="@+id/previous_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/previous_button"
-            android:text="Prev"/>
+            android:text="Prev" />
 
         <Button
             android:id="@+id/play_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/text"
-            android:text="Play"/>
+            android:text="Play" />
 
         <Button
+            android:id="@+id/next_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/next_button"
-            android:text="Next"/>
+            android:text="Next" />
 
     </LinearLayout>
-
 
 
 </LinearLayout>

@@ -10,6 +10,8 @@ public interface QueuePlayer {
 
     void resume();
 
+    void next();
+
     boolean isPlaying();
 
     boolean isPaused();
@@ -19,7 +21,7 @@ public interface QueuePlayer {
 
     void release();
 
-    void nextTrack(String url);
+    void setNextTrack(String url);
 
 
 }

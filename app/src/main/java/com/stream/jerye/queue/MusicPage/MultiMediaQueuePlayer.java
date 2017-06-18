@@ -23,13 +23,14 @@ public class MultiMediaQueuePlayer implements QueuePlayer, MediaPlayer.OnComplet
 
     private MediaPlayer mMediaPlayer;
     private String mCurrentTrack;
-    private String mNextTrack;
+    private String mNextTrackUrl;
     private Player mSpotifyQueuePlayer;
     private String mSpotifyAccessToken;
     private MusicQueueListener mMusicQueueListener;
     private Context mContext;
     private static boolean spotifyPlayerIsPlaying = false;
     private static boolean spotifyPlayerIsPaused = false;
+    private static boolean spotifyPlayerIsFresh = false;
 
 
     private static final int GENERAL_AUDIO_URL = 1;
@@ -85,7 +86,7 @@ public class MultiMediaQueuePlayer implements QueuePlayer, MediaPlayer.OnComplet
             Log.d("MainActivity.java", "creating spotify player " + url);
 
 
-            createSpotifyAudioPlayer(url);
+            createSpotifyAudioPlayer();
 
 
         } else {
@@ -139,9 +140,15 @@ public class MultiMediaQueuePlayer implements QueuePlayer, MediaPlayer.OnComplet
     }
 
     @Override
+    public void next() {
+        if (mSpotifyQueuePlayer != null && mNextTrackUrl != null) {
+            mSpotifyQueuePlayer.skipToNext();
+
+        }
+    }
+
+    @Override
     public boolean isPlaying() {
-        Log.d(TAG, spotifyPlayerIsPlaying+"");
-        Log.d(TAG, spotifyPlayerIsPaused+"");
         return mSpotifyQueuePlayer != null && (spotifyPlayerIsPlaying && !spotifyPlayerIsPaused);
 //                (mMediaPlayer != null && mMediaPlayer.isPlaying());
     }
@@ -158,8 +165,8 @@ public class MultiMediaQueuePlayer implements QueuePlayer, MediaPlayer.OnComplet
     }
 
     @Override
-    public void nextTrack(String nextTrackUrl) {
-        mNextTrack = nextTrackUrl;
+    public void setNextTrack(String nextTrackUrl) {
+        mNextTrackUrl = nextTrackUrl;
     }
 
     private void createAndroidMediaPlayer(String url) throws IOException {
@@ -174,7 +181,7 @@ public class MultiMediaQueuePlayer implements QueuePlayer, MediaPlayer.OnComplet
     }
 
 
-    private void createSpotifyAudioPlayer(final String url) {
+    private void createSpotifyAudioPlayer() {
         //SpotifyMusicPlayer
         Config playerConfig = new Config(mContext, mSpotifyAccessToken, MainActivity.CLIENT_ID);
 
@@ -198,7 +205,7 @@ public class MultiMediaQueuePlayer implements QueuePlayer, MediaPlayer.OnComplet
     public void onLoggedIn() {
         Log.d(TAG, "logged in");
         mSpotifyQueuePlayer.play(mCurrentTrack);
-
+        mMusicQueueListener.dequeue();
     }
 
     @Override
@@ -226,22 +233,22 @@ public class MultiMediaQueuePlayer implements QueuePlayer, MediaPlayer.OnComplet
 
     @Override
     public void onPlaybackEvent(EventType eventType, PlayerState playerState) {
-        Log.d(TAG, "player state: " + playerState.toString());
-        Log.d(TAG, "event type: " + eventType.name());
-        switch (eventType) {
-            case PLAY:
-                spotifyPlayerIsPlaying = true;
-                spotifyPlayerIsPaused = false;
-            case PAUSE:
-                spotifyPlayerIsPaused = true;
-                spotifyPlayerIsPlaying = false;
-            case TRACK_CHANGED:
-            default:
-                break;
 
-
+        Log.d(TAG, "event type: " + eventType);
+        if (eventType.equals(EventType.PLAY)) {
+            spotifyPlayerIsPlaying = true;
+            spotifyPlayerIsPaused = false;
+        } else if (eventType.equals(EventType.PAUSE)) {
+            spotifyPlayerIsPaused = true;
+            spotifyPlayerIsPlaying = false;
+        } else if (eventType.equals(EventType.END_OF_CONTEXT)) {
+            mSpotifyQueuePlayer.queue(mNextTrackUrl);
+            mMusicQueueListener.dequeue();
         }
+
+
     }
+
 
     @Override
     public void onPlaybackError(ErrorType errorType, String s) {

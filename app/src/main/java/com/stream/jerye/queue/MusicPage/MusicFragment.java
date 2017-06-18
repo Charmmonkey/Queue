@@ -17,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -41,6 +42,7 @@ public class MusicFragment extends Fragment implements Search.View, MusicQueueLi
     private DatabaseReference mDatabaseTracksReference;
     private SearchView mSearchView;
     private RecyclerView mMusicResultsList, mMusicQueueList;
+    private TextView mCurrentMusicView;
     private Button mPlayButton, mPreviousbutton, mNextButton;
     private FirebaseDatabase mFirebaseDatabase;
     private View mRootView;
@@ -97,7 +99,8 @@ public class MusicFragment extends Fragment implements Search.View, MusicQueueLi
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mRootView = inflater.inflate(R.layout.music_fragment, container, false);
-        mPlayButton = (Button) mRootView.findViewById(com.stream.jerye.queue.R.id.play_button);
+        mCurrentMusicView = (TextView) mRootView.findViewById(R.id.music_current);
+        mPlayButton = (Button) mRootView.findViewById(R.id.play_button);
         mPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -122,7 +125,7 @@ public class MusicFragment extends Fragment implements Search.View, MusicQueueLi
 
                 } else {
                     mPlayer.play(currentTrackUrl);
-                    mPlayer.nextTrack(mQueueMusicAdapter.peekMore());
+                    mPlayer.setNextTrack(mQueueMusicAdapter.peekMore());
                     mPlayButton.setText("Pause");
                 }
             }
@@ -138,6 +141,8 @@ public class MusicFragment extends Fragment implements Search.View, MusicQueueLi
                     Log.d("MainActivity.java", "mPlayer is null");
                     return;
                 }
+
+                mPlayer.next();
 
 
             }
@@ -281,7 +286,17 @@ public class MusicFragment extends Fragment implements Search.View, MusicQueueLi
     @Override
     public void dequeue() {
         Log.d("MainActivity.java", "QueueListener dequeue");
-        mQueueMusicAdapter.dequeue();
+        // curr song 1
+        String current = mQueueMusicAdapter.peek();
+        Log.d("MainActivity.java", "current music: " + current);
+
+
+        mQueueMusicAdapter.dequeue(); //reroute to db eventually.
+
+        //
+        mCurrentMusicView.setText(current);
+
+        if(mQueueMusicAdapter.getItemCount()>0) mPlayer.setNextTrack(mQueueMusicAdapter.peek());
     }
 
     @Override

@@ -56,7 +56,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
     }
 
     public String peekMore(){
-        return mItems.get(1);
+        return mItems.size() > 1 ? mItems.get(1) : null;
     }
 
     public void enqueue(String enqueuedMusic) {
