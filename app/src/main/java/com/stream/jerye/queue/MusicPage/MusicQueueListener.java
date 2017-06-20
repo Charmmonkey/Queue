@@ -7,4 +7,6 @@ package com.stream.jerye.queue.MusicPage;
 public interface MusicQueueListener {
 
     void dequeue();
+    void getSongProgress(int positionInMs);
+    void getSongDuraction(int durationInMs);
 }

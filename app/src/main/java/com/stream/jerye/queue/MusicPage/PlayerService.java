@@ -18,7 +18,7 @@ public class PlayerService extends Service {
 
     public class PlayerBinder extends Binder {
         public QueuePlayer getService(Context context, MusicQueueListener musicQueueListener, String spotifyAccessToken) {
-            mQueuePlayer = new MultiMediaQueuePlayer(context, musicQueueListener, spotifyAccessToken);
+            mQueuePlayer = new MultiMediaPlayer(context, musicQueueListener, spotifyAccessToken);
             return mQueuePlayer;
         }
     }

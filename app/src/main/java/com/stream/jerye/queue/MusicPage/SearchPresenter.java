@@ -53,7 +53,6 @@ public class SearchPresenter implements Search.ActionListener {
     @Override
     public void search(@Nullable String searchQuery) {
         if (searchQuery != null && !searchQuery.isEmpty() && !searchQuery.equals(mCurrentQuery)) {
-            logMessage("query text submit " + searchQuery);
             mCurrentQuery = searchQuery;
             mView.reset();
             mSearchListener = new SearchPager.CompleteListener() {
@@ -102,7 +101,7 @@ public class SearchPresenter implements Search.ActionListener {
     public void selectTrack(Track item) {
         String uri = item.uri;
 
-        if (uri == null) {
+        if (uri != null) {
             logMessage(uri);
             mView.onTrackSelected(uri);
             return;

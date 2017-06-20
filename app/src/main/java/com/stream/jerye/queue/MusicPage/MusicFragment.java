@@ -17,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.google.firebase.database.ChildEventListener;
@@ -34,7 +35,7 @@ import kaaes.spotify.webapi.android.models.Track;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MusicFragment extends Fragment implements Search.View, MusicQueueListener {
+public class MusicFragment extends Fragment implements Search.View, MusicQueueListener{
     private LinearLayoutManager mResultsLayoutManager = new LinearLayoutManager(getContext()), mQueueLayoutManager = new LinearLayoutManager(getContext());
     private ScrollListener mScrollListener = new ScrollListener(mResultsLayoutManager);
     private SearchResultsAdapter mSearchResultsAdapter;
@@ -46,6 +47,7 @@ public class MusicFragment extends Fragment implements Search.View, MusicQueueLi
     private Button mPlayButton, mPreviousbutton, mNextButton;
     private FirebaseDatabase mFirebaseDatabase;
     private View mRootView;
+    private SeekBar mSeekBar;
     private com.spotify.sdk.android.player.Player mSpotifyPlayer;
     private String mCurrentTrack;
     private QueuePlayer mPlayer;
@@ -113,8 +115,6 @@ public class MusicFragment extends Fragment implements Search.View, MusicQueueLi
                     return;
                 }
 
-                String currentTrackUrl = mQueueMusicAdapter.peek();
-
 
                 if (mPlayer.isPaused()) {
                     mPlayer.resume();
@@ -124,8 +124,8 @@ public class MusicFragment extends Fragment implements Search.View, MusicQueueLi
                     mPlayButton.setText("Play");
 
                 } else {
-                    mPlayer.play(currentTrackUrl);
                     mPlayer.setNextTrack(mQueueMusicAdapter.peekMore());
+                    mPlayer.play(mQueueMusicAdapter.peek());
                     mPlayButton.setText("Pause");
                 }
             }
@@ -153,14 +153,13 @@ public class MusicFragment extends Fragment implements Search.View, MusicQueueLi
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                mActionListener.search(query);
-                mSearchView.clearFocus();
-                return true;
+                return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                return false;
+                mActionListener.search(newText);
+                return true;
             }
         });
         mMusicResultsList = (RecyclerView) mRootView.findViewById(R.id.search_results);
@@ -182,6 +181,8 @@ public class MusicFragment extends Fragment implements Search.View, MusicQueueLi
         mMusicQueueList.setLayoutManager(mQueueLayoutManager);
         mQueueMusicAdapter = new MusicQueueAdapter(getContext());
         mMusicQueueList.setAdapter(mQueueMusicAdapter);
+
+        mSeekBar = (SeekBar) mRootView.findViewById(R.id.music_seekbar);
 
         return mRootView;
     }
@@ -283,6 +284,7 @@ public class MusicFragment extends Fragment implements Search.View, MusicQueueLi
         super.onDestroyView();
     }
 
+
     @Override
     public void dequeue() {
         Log.d("MainActivity.java", "QueueListener dequeue");
@@ -296,7 +298,7 @@ public class MusicFragment extends Fragment implements Search.View, MusicQueueLi
         //
         mCurrentMusicView.setText(current);
 
-        if(mQueueMusicAdapter.getItemCount()>0) mPlayer.setNextTrack(mQueueMusicAdapter.peek());
+        if (mQueueMusicAdapter.getItemCount() > 0) mPlayer.setNextTrack(mQueueMusicAdapter.peekMore());
     }
 
     @Override
@@ -307,5 +309,14 @@ public class MusicFragment extends Fragment implements Search.View, MusicQueueLi
 
     }
 
+    @Override
+    public void getSongProgress(int positionInMs) {
+        mSeekBar.setProgress(positionInMs);
 
+    }
+
+    @Override
+    public void getSongDuraction(int durationInMs) {
+        mSeekBar.setMax(durationInMs);
+    }
 }
