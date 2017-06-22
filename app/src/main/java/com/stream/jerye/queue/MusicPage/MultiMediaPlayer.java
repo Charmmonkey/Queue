@@ -292,9 +292,9 @@ public class MultiMediaPlayer implements QueuePlayer,
             while (!stop.get()) {
                 mSpotifyPlayer.getPlayerState(playerStateCallback);
                 mMusicQueueListener.getSongProgress(mPositionInMs);
-                mMusicQueueListener.getSongDuraction(mDurationInMs);
+                mMusicQueueListener.getSongDuration(mDurationInMs);
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(250);
                 } catch (InterruptedException e) {
                     Log.e(TAG, e.toString());
                 }

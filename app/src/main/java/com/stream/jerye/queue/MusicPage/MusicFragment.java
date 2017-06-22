@@ -1,13 +1,7 @@
 package com.stream.jerye.queue.MusicPage;
 
 
-import android.app.Activity;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,16 +10,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.SeekBar;
-import android.widget.TextView;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.spotify.sdk.android.player.Spotify;
 import com.stream.jerye.queue.R;
 
 import java.util.List;
@@ -35,19 +25,16 @@ import kaaes.spotify.webapi.android.models.Track;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MusicFragment extends Fragment implements Search.View, MusicQueueListener{
+public class MusicFragment extends Fragment implements Search.View{
     private LinearLayoutManager mResultsLayoutManager = new LinearLayoutManager(getContext()), mQueueLayoutManager = new LinearLayoutManager(getContext());
     private ScrollListener mScrollListener = new ScrollListener(mResultsLayoutManager);
     private SearchResultsAdapter mSearchResultsAdapter;
-    private MusicQueueAdapter mQueueMusicAdapter;
     private DatabaseReference mDatabaseTracksReference;
     private SearchView mSearchView;
     private RecyclerView mMusicResultsList, mMusicQueueList;
-    private TextView mCurrentMusicView;
-    private Button mPlayButton, mPreviousbutton, mNextButton;
     private FirebaseDatabase mFirebaseDatabase;
     private View mRootView;
-    private SeekBar mSeekBar;
+    private MusicQueueAdapter mQueueMusicAdapter;
     private com.spotify.sdk.android.player.Player mSpotifyPlayer;
     private String mCurrentTrack;
     private QueuePlayer mPlayer;
@@ -55,21 +42,6 @@ public class MusicFragment extends Fragment implements Search.View, MusicQueueLi
     private Search.ActionListener mActionListener;
     private String TAG = "MainActivity.java";
     private String mSpotifyAccessToken;
-
-    private ServiceConnection mServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.d(TAG, "Service Connected");
-            mPlayer = ((PlayerService.PlayerBinder) service).getService(getContext(), MusicFragment.this, mSpotifyAccessToken);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            Log.d(TAG, "Service DisConnected");
-
-            mPlayer = null;
-        }
-    };
 
 
     public MusicFragment() {
@@ -101,52 +73,6 @@ public class MusicFragment extends Fragment implements Search.View, MusicQueueLi
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mRootView = inflater.inflate(R.layout.music_fragment, container, false);
-        mCurrentMusicView = (TextView) mRootView.findViewById(R.id.music_current);
-        mPlayButton = (Button) mRootView.findViewById(R.id.play_button);
-        mPlayButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Log.d(TAG, "play button clicked");
-
-
-                if (mPlayer == null) {
-                    Log.d("MainActivity.java", "mPlayer is null");
-                    return;
-                }
-
-
-                if (mPlayer.isPaused()) {
-                    mPlayer.resume();
-                    mPlayButton.setText("Pause");
-                } else if (mPlayer.isPlaying()) {
-                    mPlayer.pause();
-                    mPlayButton.setText("Play");
-
-                } else {
-                    mPlayer.setNextTrack(mQueueMusicAdapter.peekMore());
-                    mPlayer.play(mQueueMusicAdapter.peek());
-                    mPlayButton.setText("Pause");
-                }
-            }
-        });
-
-        mNextButton = (Button) mRootView.findViewById(R.id.next_button);
-        mNextButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("MainActivity.java", "Next button clicked");
-
-                if (mPlayer == null) {
-                    Log.d("MainActivity.java", "mPlayer is null");
-                    return;
-                }
-
-                mPlayer.next();
-
-
-            }
-        });
 
         mSearchView = (SearchView) mRootView.findViewById(R.id.search_view);
         // Setup search field
@@ -182,8 +108,6 @@ public class MusicFragment extends Fragment implements Search.View, MusicQueueLi
         mQueueMusicAdapter = new MusicQueueAdapter(getContext());
         mMusicQueueList.setAdapter(mQueueMusicAdapter);
 
-        mSeekBar = (SeekBar) mRootView.findViewById(R.id.music_seekbar);
-
         return mRootView;
     }
 
@@ -197,8 +121,8 @@ public class MusicFragment extends Fragment implements Search.View, MusicQueueLi
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 SpotifyTrack spotifyTrack = dataSnapshot.getValue(SpotifyTrack.class);
-                mCurrentTrack = spotifyTrack.getTrack();
-                mQueueMusicAdapter.enqueue(mCurrentTrack);
+                String latestAddition = spotifyTrack.getTrack();
+                mQueueMusicAdapter.enqueue(latestAddition);
 
             }
 
@@ -222,8 +146,6 @@ public class MusicFragment extends Fragment implements Search.View, MusicQueueLi
 
             }
         });
-        SharedPreferences prefs = getContext().getSharedPreferences(getContext().getPackageName(), Context.MODE_PRIVATE);
-        mSpotifyAccessToken = prefs.getString("token", null);
 
         mActionListener = new SearchPresenter(getContext(), this);
         mActionListener.init(mSpotifyAccessToken);
@@ -233,9 +155,6 @@ public class MusicFragment extends Fragment implements Search.View, MusicQueueLi
             String currentQuery = savedInstanceState.getString(KEY_CURRENT_QUERY);
             mActionListener.search(currentQuery);
         }
-
-        getContext().bindService(PlayerService.getIntent(getContext()), mServiceConnection, Activity.BIND_AUTO_CREATE);
-
     }
 
     @Override
@@ -276,47 +195,5 @@ public class MusicFragment extends Fragment implements Search.View, MusicQueueLi
         if (mActionListener.getCurrentQuery() != null) {
             outState.putString(KEY_CURRENT_QUERY, mActionListener.getCurrentQuery());
         }
-    }
-
-    @Override
-    public void onDestroyView() {
-        Spotify.destroyPlayer(this);
-        super.onDestroyView();
-    }
-
-
-    @Override
-    public void dequeue() {
-        Log.d("MainActivity.java", "QueueListener dequeue");
-        // curr song 1
-        String current = mQueueMusicAdapter.peek();
-        Log.d("MainActivity.java", "current music: " + current);
-
-
-        mQueueMusicAdapter.dequeue(); //reroute to db eventually.
-
-        //
-        mCurrentMusicView.setText(current);
-
-        if (mQueueMusicAdapter.getItemCount() > 0) mPlayer.setNextTrack(mQueueMusicAdapter.peekMore());
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        getContext().unbindService(mServiceConnection);
-
-    }
-
-    @Override
-    public void getSongProgress(int positionInMs) {
-        mSeekBar.setProgress(positionInMs);
-
-    }
-
-    @Override
-    public void getSongDuraction(int durationInMs) {
-        mSeekBar.setMax(durationInMs);
     }
 }

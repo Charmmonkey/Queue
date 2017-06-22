@@ -8,5 +8,5 @@ public interface MusicQueueListener {
 
     void dequeue();
     void getSongProgress(int positionInMs);
-    void getSongDuraction(int durationInMs);
+    void getSongDuration(int durationInMs);
 }
