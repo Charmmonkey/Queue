@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements MusicQueueListene
     private String TAG = "MainActivity.java";
     private String mToken;
     private FirebaseEventBus.MusicDatabaseAccess mMusicDatabaseAccess;
-    private List<SpotifyTrack> mQueuedTracks;
+    private static List<SpotifyTrack> mQueuedTracks;
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -70,13 +70,16 @@ public class MainActivity extends AppCompatActivity implements MusicQueueListene
     SeekBar mSeekBar;
     @BindView(R.id.music_current)
     TextView mCurrentMusicView;
+    @BindView(R.id.music_duration)
+    TextView mMusicDuration;
+    @BindView(R.id.music_progress)
+    TextView mMusicProgress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity_layout);
         ButterKnife.bind(this);
-        bindService(PlayerService.getIntent(this), mServiceConnection, Activity.BIND_AUTO_CREATE);
 
         AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
                 AuthenticationResponse.Type.TOKEN,
@@ -134,6 +137,23 @@ public class MainActivity extends AppCompatActivity implements MusicQueueListene
             }
         });
 
+        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
 
     }
 
@@ -150,6 +170,8 @@ public class MainActivity extends AppCompatActivity implements MusicQueueListene
                 Log.d("MainActivity.java", "type: " + response.getType());
 
                 mToken = response.getAccessToken();
+                bindService(PlayerService.getIntent(this), mServiceConnection, Activity.BIND_AUTO_CREATE);
+
                 SharedPreferences prefs = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
                 prefs.edit().putString("token", mToken).apply();
 
@@ -190,6 +212,7 @@ public class MainActivity extends AppCompatActivity implements MusicQueueListene
     @Override
     public void peekedResult(List<SpotifyTrack> list) {
         mQueuedTracks = list;
+        Log.d(TAG, mQueuedTracks.toString());
     }
 
     @Override
@@ -212,11 +235,17 @@ public class MainActivity extends AppCompatActivity implements MusicQueueListene
 
     @Override
     public void getSongProgress(int positionInMs) {
+        Log.d(TAG, "player state called");
         mSeekBar.setProgress(positionInMs);
+        int totalInS = positionInMs / 1000;
+        int minutes = totalInS / 60;
+        int seconds = totalInS % 60;
+        mMusicProgress.setText(minutes + ":"+ seconds);
     }
 
     @Override
     public void getSongDuration(int durationInMs) {
+        Log.d(TAG, "setting max");
         mSeekBar.setMax(durationInMs);
     }
 

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.UriMatcher;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -34,7 +36,10 @@ public class MultiMediaPlayer implements QueuePlayer,
     private String mSpotifyAccessToken;
     private MusicQueueListener mMusicQueueListener;
     private Context mContext;
+    private Handler mHandler = null;
     private MediaObserver mMediaObserver = null;
+    private int mPositionInMs;
+    private int mDurationInMs;
     private static boolean spotifyPlayerIsPlaying = false;
     private static boolean spotifyPlayerIsPaused = false;
     private static boolean spotifyPlayerIsFresh = false;
@@ -109,7 +114,6 @@ public class MultiMediaPlayer implements QueuePlayer,
                 Log.e(TAG, "Could not play: " + url, e);
             }
         }
-
 
     }
 
@@ -214,6 +218,7 @@ public class MultiMediaPlayer implements QueuePlayer,
         mSpotifyPlayer.play(mCurrentTrack);
         mSpotifyPlayer.queue(mNextTrackUrl);
         mMusicQueueListener.dequeue();
+        mHandler = new Handler(Looper.getMainLooper());
         mMediaObserver = new MediaObserver();
 
     }
@@ -246,9 +251,11 @@ public class MultiMediaPlayer implements QueuePlayer,
             spotifyPlayerIsPlaying = true;
             spotifyPlayerIsPaused = false;
             mMediaObserver.startAgain();
-            new Thread(mMediaObserver).start();
-        } else if (eventType.equals(EventType.TRACK_START)) {
+            mHandler.postDelayed(mMediaObserver, 250);
 
+        } else if (eventType.equals(EventType.AUDIO_FLUSH)) {
+            mSpotifyPlayer.getPlayerState(this);
+            mMusicQueueListener.getSongDuration(mDurationInMs);
         } else if (eventType.equals(EventType.PAUSE)) {
             spotifyPlayerIsPaused = true;
             spotifyPlayerIsPlaying = false;
@@ -265,43 +272,28 @@ public class MultiMediaPlayer implements QueuePlayer,
 
     @Override
     public void onPlayerState(PlayerState playerState) {
+        mPositionInMs = playerState.positionInMs;
+        mDurationInMs = playerState.durationInMs;
     }
 
     private class MediaObserver implements Runnable {
         private AtomicBoolean stop = new AtomicBoolean(false);
-        private int mPositionInMs;
-        private int mDurationInMs;
-        private PlayerStateCallback playerStateCallback = new PlayerStateCallback() {
-            @Override
-            public void onPlayerState(PlayerState playerState) {
-                mPositionInMs = playerState.positionInMs;
-                mDurationInMs = playerState.durationInMs;
-            }
-        };
 
         public void stop() {
             stop.set(true);
         }
 
-        public void startAgain(){
+        public void startAgain() {
             stop.set(false);
         }
 
         @Override
         public void run() {
-            while (!stop.get()) {
-                mSpotifyPlayer.getPlayerState(playerStateCallback);
+            if (!stop.get()) {
+                mSpotifyPlayer.getPlayerState(MultiMediaPlayer.this);
                 mMusicQueueListener.getSongProgress(mPositionInMs);
-                mMusicQueueListener.getSongDuration(mDurationInMs);
-                try {
-                    Thread.sleep(250);
-                } catch (InterruptedException e) {
-                    Log.e(TAG, e.toString());
-                }
-
+                mHandler.postDelayed(mMediaObserver, 250);
             }
         }
     }
-
-
 }

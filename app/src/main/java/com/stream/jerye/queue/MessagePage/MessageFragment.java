@@ -62,8 +62,8 @@ public class MessageFragment extends Fragment {
         mEditText = (EditText) mRootView.findViewById(R.id.edit_textbox);
         mMessageSendButton = (Button) mRootView.findViewById(R.id.send_button);
         mRecyclerView = (RecyclerView) mRootView.findViewById(R.id.text);
-
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        mRecyclerView.setLayoutManager(linearLayoutManager);
         messageList = new ArrayList<>();
         mMessageAdapter = new MessageAdapter(getContext(), messageList);
         mRecyclerView.setAdapter(mMessageAdapter);
