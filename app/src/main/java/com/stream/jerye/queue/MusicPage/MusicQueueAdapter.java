@@ -17,7 +17,7 @@ import java.util.List;
  */
 
 public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.MusicQueueViewHolder> {
-    private List<String> mItems = new ArrayList<>();
+    private List<SimpleTrack> mItems = new ArrayList<>();
     private Context mContext;
 
     public MusicQueueAdapter(Context context) {
@@ -43,7 +43,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
 
     @Override
     public void onBindViewHolder(MusicQueueViewHolder holder, int position) {
-        holder.track.setText(mItems.get(position));
+        holder.track.setText(mItems.get(position).getName());
     }
 
     @Override
@@ -51,15 +51,8 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         return mItems.size();
     }
 
-    public String peek(){
-        return mItems.get(0);
-    }
 
-    public String peekMore(){
-        return mItems.size() > 1 ? mItems.get(1) : null;
-    }
-
-    public void enqueue(String enqueuedMusic) {
+    public void enqueue(SimpleTrack enqueuedMusic) {
         mItems.add(enqueuedMusic);
         notifyDataSetChanged();
     }

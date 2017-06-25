@@ -1,6 +1,8 @@
 package com.stream.jerye.queue.MusicPage;
 
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,11 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.stream.jerye.queue.FirebaseEventBus;
 import com.stream.jerye.queue.R;
 
 import java.util.List;
@@ -25,23 +23,19 @@ import kaaes.spotify.webapi.android.models.Track;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MusicFragment extends Fragment implements Search.View{
+public class MusicFragment extends Fragment implements Search.View, FirebaseEventBus.FirebaseQueueAdapterHandler{
     private LinearLayoutManager mResultsLayoutManager = new LinearLayoutManager(getContext()), mQueueLayoutManager = new LinearLayoutManager(getContext());
     private ScrollListener mScrollListener = new ScrollListener(mResultsLayoutManager);
     private SearchResultsAdapter mSearchResultsAdapter;
-    private DatabaseReference mDatabaseTracksReference;
     private SearchView mSearchView;
     private RecyclerView mMusicResultsList, mMusicQueueList;
-    private FirebaseDatabase mFirebaseDatabase;
     private View mRootView;
     private MusicQueueAdapter mQueueMusicAdapter;
-    private com.spotify.sdk.android.player.Player mSpotifyPlayer;
-    private String mCurrentTrack;
-    private QueuePlayer mPlayer;
     private static final String KEY_CURRENT_QUERY = "CURRENT_QUERY";
     private Search.ActionListener mActionListener;
     private String TAG = "MainActivity.java";
     private String mSpotifyAccessToken;
+    private FirebaseEventBus.MusicDatabaseAccess mMusicDatabaseAccess = new FirebaseEventBus.MusicDatabaseAccess(this);
 
 
     public MusicFragment() {
@@ -72,6 +66,7 @@ public class MusicFragment extends Fragment implements Search.View{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.d(TAG, "music frag create view");
         mRootView = inflater.inflate(R.layout.music_fragment, container, false);
 
         mSearchView = (SearchView) mRootView.findViewById(R.id.search_view);
@@ -114,38 +109,12 @@ public class MusicFragment extends Fragment implements Search.View{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "music frag create");
 
-        mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mDatabaseTracksReference = mFirebaseDatabase.getReference().child("tracks");
-        mDatabaseTracksReference.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                SpotifyTrack spotifyTrack = dataSnapshot.getValue(SpotifyTrack.class);
-                String latestAddition = spotifyTrack.getTrack();
-                mQueueMusicAdapter.enqueue(latestAddition);
+        SharedPreferences prefs = getContext().getSharedPreferences(getContext().getPackageName(), Context.MODE_PRIVATE);
+        mSpotifyAccessToken = prefs.getString("token", "");
 
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        mMusicDatabaseAccess.addChildListener();
 
         mActionListener = new SearchPresenter(getContext(), this);
         mActionListener.init(mSpotifyAccessToken);
@@ -169,12 +138,15 @@ public class MusicFragment extends Fragment implements Search.View{
     }
 
     @Override
-    public void onTrackSelected(String trackUrl) {
+    public void onTrackSelected(SimpleTrack simpleTrack) {
         Log.d("MainActivity.java", "onTrackSelected");
-        SpotifyTrack selectedTrack = new SpotifyTrack(trackUrl);
-        mDatabaseTracksReference.push().setValue(selectedTrack);
+        mMusicDatabaseAccess.push(simpleTrack);
     }
 
+    @Override
+    public void enqueue(SimpleTrack simpleTrack) {
+        mQueueMusicAdapter.enqueue(simpleTrack);
+    }
 
     @Override
     public void onPause() {

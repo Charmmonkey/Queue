@@ -27,22 +27,22 @@ import com.stream.jerye.queue.MusicPage.MusicFragment;
 import com.stream.jerye.queue.MusicPage.MusicQueueListener;
 import com.stream.jerye.queue.MusicPage.PlayerService;
 import com.stream.jerye.queue.MusicPage.QueuePlayer;
-import com.stream.jerye.queue.MusicPage.SpotifyTrack;
+import com.stream.jerye.queue.MusicPage.SimpleTrack;
 
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements MusicQueueListener, FirebaseEventBus.FirebaseListener {
+public class MainActivity extends AppCompatActivity implements MusicQueueListener, FirebaseEventBus.FirebasePeekHandler {
     public static final String CLIENT_ID = "06a251bae8ae4881bb0022223b960c1d";
     private static final String REDIRECT_URI = "https://en.wikipedia.org/wiki/Whitelist";
     private static final int REQUEST_CODE = 42;
     private QueuePlayer mPlayer;
     private String TAG = "MainActivity.java";
     private String mToken;
-    private FirebaseEventBus.MusicDatabaseAccess mMusicDatabaseAccess;
-    private static List<SpotifyTrack> mQueuedTracks;
+    private FirebaseEventBus.MusicDatabaseAccess mMusicDatabaseAccess = new FirebaseEventBus.MusicDatabaseAccess(this);
+    private static List<SimpleTrack> mQueuedTracks;
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -89,7 +89,6 @@ public class MainActivity extends AppCompatActivity implements MusicQueueListene
 
         AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
 
-        mMusicDatabaseAccess = new FirebaseEventBus.MusicDatabaseAccess(this);
         mMusicDatabaseAccess.peek();
 
     }
@@ -140,17 +139,19 @@ public class MainActivity extends AppCompatActivity implements MusicQueueListene
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
+                if (fromUser) {
+                    mPlayer.seekTo(progress);
+                }
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
+                mPlayer.pause();
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                mPlayer.resume();
             }
         });
 
@@ -210,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements MusicQueueListene
 
 
     @Override
-    public void peekedResult(List<SpotifyTrack> list) {
+    public void peekedResult(List<SimpleTrack> list) {
         mQueuedTracks = list;
         Log.d(TAG, mQueuedTracks.toString());
     }
@@ -240,13 +241,18 @@ public class MainActivity extends AppCompatActivity implements MusicQueueListene
         int totalInS = positionInMs / 1000;
         int minutes = totalInS / 60;
         int seconds = totalInS % 60;
-        mMusicProgress.setText(minutes + ":"+ seconds);
+        mMusicProgress.setText(minutes + ":" + (seconds < 10 ? "0" : "") + seconds);
     }
 
     @Override
     public void getSongDuration(int durationInMs) {
-        Log.d(TAG, "setting max");
+        Log.d(TAG, "setting max: " + durationInMs);
         mSeekBar.setMax(durationInMs);
+
+        int totalInS = durationInMs / 1000;
+        int minutes = totalInS / 60;
+        int seconds = totalInS % 60;
+        mMusicDuration.setText(minutes + ":" + (seconds < 10 ? "0" : "") + seconds);
     }
 
     @Override

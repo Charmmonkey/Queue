@@ -10,6 +10,8 @@ public interface QueuePlayer {
 
     void resume();
 
+    void seekTo(int newPosition);
+
     void next();
 
     boolean isPlaying();

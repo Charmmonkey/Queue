@@ -99,11 +99,10 @@ public class SearchPresenter implements Search.ActionListener {
 
     @Override
     public void selectTrack(Track item) {
-        String uri = item.uri;
+        SimpleTrack simpleTrack = new SimpleTrack(item);
 
-        if (uri != null) {
-            logMessage(uri);
-            mView.onTrackSelected(uri);
+        if (simpleTrack != null) {
+            mView.onTrackSelected(simpleTrack);
             return;
         }else{
             Toast.makeText(mContext, "Could not find song", Toast.LENGTH_SHORT).show();

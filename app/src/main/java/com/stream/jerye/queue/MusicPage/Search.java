@@ -11,7 +11,7 @@ public class Search {
 
         void addData(List<Track> items);
 
-        void onTrackSelected(String trackUrl);
+        void onTrackSelected(SimpleTrack simpleTrack);
     }
 
     public interface ActionListener {

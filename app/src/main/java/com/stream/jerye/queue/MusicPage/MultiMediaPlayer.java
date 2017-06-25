@@ -151,6 +151,11 @@ public class MultiMediaPlayer implements QueuePlayer,
     }
 
     @Override
+    public void seekTo(int newPosition) {
+        mSpotifyPlayer.seekToPosition(newPosition);
+    }
+
+    @Override
     public void next() {
         if (mSpotifyPlayer != null && mNextTrackUrl != null) {
             mSpotifyPlayer.skipToNext();

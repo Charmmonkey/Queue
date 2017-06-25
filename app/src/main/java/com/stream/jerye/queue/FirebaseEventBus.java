@@ -7,7 +7,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.stream.jerye.queue.MusicPage.SpotifyTrack;
+import com.stream.jerye.queue.MusicPage.SimpleTrack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,15 +21,25 @@ public class FirebaseEventBus {
     private static DatabaseReference mMusicDatabaseReference, mMessageDatabaseReference;
     private static String TAG = "FirebaseEventBus.java";
 
-    public interface FirebaseListener {
-        void peekedResult(List<SpotifyTrack> list);
+    public interface FirebasePeekHandler {
+        void peekedResult(List<SimpleTrack> list);
+    }
+
+    public interface FirebaseQueueAdapterHandler {
+        void enqueue(SimpleTrack simpleTrack);
     }
 
     public static class MusicDatabaseAccess {
-        private FirebaseListener mFirebaseListener;
+        private FirebasePeekHandler mFirebasePeekHandler;
+        private FirebaseQueueAdapterHandler mFirebaseQueueAdapterHandler;
 
-        public MusicDatabaseAccess(FirebaseListener firebaseListener) {
-            mFirebaseListener = firebaseListener;
+        public MusicDatabaseAccess(FirebasePeekHandler firebasePeekHandler) {
+            mFirebasePeekHandler = firebasePeekHandler;
+            mFirebaseDatabase = FirebaseDatabase.getInstance();
+            mMusicDatabaseReference = mFirebaseDatabase.getReference().child("tracks");
+        }
+        public MusicDatabaseAccess(FirebaseQueueAdapterHandler firebaseQueueAdapterHandler){
+            mFirebaseQueueAdapterHandler = firebaseQueueAdapterHandler;
             mFirebaseDatabase = FirebaseDatabase.getInstance();
             mMusicDatabaseReference = mFirebaseDatabase.getReference().child("tracks");
         }
@@ -38,7 +48,9 @@ public class FirebaseEventBus {
             mMusicDatabaseReference.addChildEventListener(new ChildEventListener() {
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-
+                    SimpleTrack simpleTrack = dataSnapshot.getValue(SimpleTrack.class);
+                    simpleTrack.setKey(dataSnapshot.getKey());
+                    mFirebaseQueueAdapterHandler.enqueue(simpleTrack);
                 }
                 @Override
                 public void onChildChanged(DataSnapshot dataSnapshot, String s) {
@@ -58,16 +70,19 @@ public class FirebaseEventBus {
                 }
             });
         }
+        public void push(SimpleTrack simpleTrack){
+            mMusicDatabaseReference.push().setValue(simpleTrack);
+        }
 
         public void peek() {
             mMusicDatabaseReference.orderByKey().limitToFirst(2).addChildEventListener(new ChildEventListener() {
-                List<SpotifyTrack> list = new ArrayList<>(2);
+                List<SimpleTrack> list = new ArrayList<>(2);
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                     Log.d(TAG, "peeked");
-                    list.add(dataSnapshot.getValue(SpotifyTrack.class));
+                    list.add(dataSnapshot.getValue(SimpleTrack.class));
                     if(list.size()==2){
-                        mFirebaseListener.peekedResult(list);
+                        mFirebasePeekHandler.peekedResult(list);
                     }
                 }
                 @Override
@@ -87,6 +102,10 @@ public class FirebaseEventBus {
 
                 }
             });
+        }
+
+        public void remove(){
+//            mMusicDatabaseReference.
         }
     }
 
