@@ -14,7 +14,6 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-
     <TextView
         android:id="@+id/music_current"
         android:layout_width="wrap_content"
@@ -58,12 +57,13 @@
             android:layout_height="wrap_content"
             android:text="Prev" />
 
-        <Button
+        <ImageView
             android:id="@+id/play_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/text"
-            android:text="Play" />
+            android:scaleType="center"
+            android:src="@drawable/ic_play" />
 
         <Button
             android:id="@+id/next_button"

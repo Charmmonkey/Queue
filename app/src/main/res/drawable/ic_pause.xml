@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="40dp"
+    android:height="40dp"
+    android:viewportWidth="@integer/viewport_width"
+    android:viewportHeight="@integer/viewport_height">
+
+    <group
+        android:name="@string/groupPlayPause"
+        android:pivotX="@integer/viewport_center_x"
+        android:pivotY="@integer/viewport_center_y">
+
+        <path
+            android:name="@string/pause"
+            android:pathData="@string/path_pause"
+            android:fillColor="@color/stroke_color"/>
+
+    </group>
+
+</vector>

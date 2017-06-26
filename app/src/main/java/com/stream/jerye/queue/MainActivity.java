@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
@@ -16,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -41,6 +43,9 @@ public class MainActivity extends AppCompatActivity implements MusicQueueListene
     private QueuePlayer mPlayer;
     private String TAG = "MainActivity.java";
     private String mToken;
+
+    private AnimatedVectorDrawable playToPause;
+    private AnimatedVectorDrawable pauseToPlay;
     private FirebaseEventBus.MusicDatabaseAccess mMusicDatabaseAccess = new FirebaseEventBus.MusicDatabaseAccess(this);
     private static List<SimpleTrack> mQueuedTracks;
     private ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -61,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements MusicQueueListene
     @BindView(R.id.view_pager)
     ViewPager mPager;
     @BindView(R.id.play_button)
-    Button mPlayButton;
+    ImageView mPlayButton;
     @BindView(R.id.next_button)
     Button mNextButton;
     @BindView(R.id.previous_button)
@@ -89,7 +94,11 @@ public class MainActivity extends AppCompatActivity implements MusicQueueListene
 
         AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
 
+        playToPause = (AnimatedVectorDrawable) getDrawable(R.drawable.avd_play_to_pause);
+        pauseToPlay = (AnimatedVectorDrawable) getDrawable(R.drawable.avd_pause_to_play);
+
         mMusicDatabaseAccess.peek();
+
 
     }
 
@@ -109,14 +118,17 @@ public class MainActivity extends AppCompatActivity implements MusicQueueListene
                 if (mQueuedTracks != null) {
                     if (mPlayer.isPaused()) {
                         mPlayer.resume();
-                        mPlayButton.setText("Pause");
+                        mPlayButton.setImageDrawable(pauseToPlay);
+                        pauseToPlay.start();
                     } else if (mPlayer.isPlaying()) {
                         mPlayer.pause();
-                        mPlayButton.setText("Play");
+                        mPlayButton.setImageDrawable(playToPause);
+                        playToPause.start();
                     } else {
                         mPlayer.setNextTrack(mQueuedTracks.get(1).getTrack());
                         mPlayer.play(mQueuedTracks.get(0).getTrack());
-                        mPlayButton.setText("Pause");
+                        mPlayButton.setImageDrawable(pauseToPlay);
+                        pauseToPlay.start();
                     }
                 }
 

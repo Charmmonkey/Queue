@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources> <integer name="viewport_width">26</integer>
+    <integer name="viewport_height">26</integer>
+    <integer name="viewport_center_x">13</integer>
+    <integer name="viewport_center_y">13</integer>
+    <string name="path_pause">M6,5 v16 l5,0 v-16 z M20,5 v16 l-5,0 v-16 z</string>
+    <string name="path_play">M6,5 v16 l7,-4 v-8 z M13,9 v8 l7,-4 v0 z</string>
+    <integer name="stroke_width">2</integer>
+
+    <!-- names -->
+    <string name="play">play</string>
+    <string name="pause">pause</string>
+    <string name="groupPlayPause">groupTickCross</string>
+
+    <!-- drawing -->
+    <color name="stroke_color">#999</color>
+
+    <!-- timing -->
+    <integer name="duration">1000</integer>
+</resources>
