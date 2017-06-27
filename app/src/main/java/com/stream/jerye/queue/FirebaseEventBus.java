@@ -7,6 +7,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.stream.jerye.queue.MessagePage.Message;
 import com.stream.jerye.queue.MusicPage.SimpleTrack;
 
 import java.util.ArrayList;
@@ -28,6 +29,11 @@ public class FirebaseEventBus {
     public interface FirebaseQueueAdapterHandler {
         void enqueue(SimpleTrack simpleTrack);
     }
+
+    public interface FirebaseMessageHandler{
+        void addMessage(Message message);
+    }
+
 
     public static class MusicDatabaseAccess {
         private FirebasePeekHandler mFirebasePeekHandler;
@@ -109,6 +115,44 @@ public class FirebaseEventBus {
         }
     }
 
-    public class MessageDatabaseAccess {
+    public static class MessageDatabaseAccess {
+        private FirebaseMessageHandler mFirebaseMessageHandler;
+
+        public MessageDatabaseAccess(FirebaseMessageHandler firebaseMessageHandler){
+            mFirebaseDatabase = FirebaseDatabase.getInstance();
+            mMessageDatabaseReference = mFirebaseDatabase.getReference().child("messages");
+            mFirebaseMessageHandler = firebaseMessageHandler;
+        }
+
+        public void addChildListener() {
+            mMessageDatabaseReference.addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    Message message = dataSnapshot.getValue(Message.class);
+                    mFirebaseMessageHandler.addMessage(message);
+                }
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                }
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                }
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+
+        public void push(String chatMessage, String userName){
+            Message message = new Message(chatMessage, userName, null);
+            mMessageDatabaseReference.push().setValue(message);
+        }
     }
 }

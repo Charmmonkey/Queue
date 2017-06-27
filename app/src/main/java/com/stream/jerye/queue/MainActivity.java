@@ -24,26 +24,32 @@ import android.widget.TextView;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
+import com.squareup.picasso.Picasso;
 import com.stream.jerye.queue.MessagePage.MessageFragment;
 import com.stream.jerye.queue.MusicPage.MusicFragment;
 import com.stream.jerye.queue.MusicPage.MusicQueueListener;
 import com.stream.jerye.queue.MusicPage.PlayerService;
 import com.stream.jerye.queue.MusicPage.QueuePlayer;
 import com.stream.jerye.queue.MusicPage.SimpleTrack;
+import com.stream.jerye.queue.profile.SpotifyProfile;
 
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import kaaes.spotify.webapi.android.models.UserPrivate;
 
-public class MainActivity extends AppCompatActivity implements MusicQueueListener, FirebaseEventBus.FirebasePeekHandler {
+public class MainActivity extends AppCompatActivity implements
+        MusicQueueListener,
+        FirebaseEventBus.FirebasePeekHandler,
+        SpotifyProfile.SpotifyProfileCallback {
     public static final String CLIENT_ID = "06a251bae8ae4881bb0022223b960c1d";
     private static final String REDIRECT_URI = "https://en.wikipedia.org/wiki/Whitelist";
     private static final int REQUEST_CODE = 42;
     private QueuePlayer mPlayer;
     private String TAG = "MainActivity.java";
     private String mToken;
-
+    private SharedPreferences prefs;
     private AnimatedVectorDrawable playToPause;
     private AnimatedVectorDrawable pauseToPlay;
     private FirebaseEventBus.MusicDatabaseAccess mMusicDatabaseAccess = new FirebaseEventBus.MusicDatabaseAccess(this);
@@ -79,12 +85,17 @@ public class MainActivity extends AppCompatActivity implements MusicQueueListene
     TextView mMusicDuration;
     @BindView(R.id.music_progress)
     TextView mMusicProgress;
+    @BindView(R.id.profile_name)
+    TextView mProfileName;
+    @BindView(R.id.profile_picture)
+    ImageView mProfilePicture;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity_layout);
         ButterKnife.bind(this);
+        prefs = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
 
         AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
                 AuthenticationResponse.Type.TOKEN,
@@ -118,17 +129,17 @@ public class MainActivity extends AppCompatActivity implements MusicQueueListene
                 if (mQueuedTracks != null) {
                     if (mPlayer.isPaused()) {
                         mPlayer.resume();
-                        mPlayButton.setImageDrawable(pauseToPlay);
-                        pauseToPlay.start();
-                    } else if (mPlayer.isPlaying()) {
-                        mPlayer.pause();
                         mPlayButton.setImageDrawable(playToPause);
                         playToPause.start();
+                    } else if (mPlayer.isPlaying()) {
+                        mPlayer.pause();
+                        mPlayButton.setImageDrawable(pauseToPlay);
+                        pauseToPlay.start();
                     } else {
                         mPlayer.setNextTrack(mQueuedTracks.get(1).getTrack());
                         mPlayer.play(mQueuedTracks.get(0).getTrack());
-                        mPlayButton.setImageDrawable(pauseToPlay);
-                        pauseToPlay.start();
+                        mPlayButton.setImageDrawable(playToPause);
+                        playToPause.start();
                     }
                 }
 
@@ -181,18 +192,31 @@ public class MainActivity extends AppCompatActivity implements MusicQueueListene
             AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
             if (response.getType() == AuthenticationResponse.Type.TOKEN) {
                 Log.d("MainActivity.java", "type: " + response.getType());
-
                 mToken = response.getAccessToken();
                 bindService(PlayerService.getIntent(this), mServiceConnection, Activity.BIND_AUTO_CREATE);
 
-                SharedPreferences prefs = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
                 prefs.edit().putString("token", mToken).apply();
 
                 mPager.setAdapter(new SimpleFragmentPageAdapter(getSupportFragmentManager()));
+
+                SpotifyProfile spotifyProfile = new SpotifyProfile(this, mToken);
+                spotifyProfile.getUserProfile();
             }
         }
     }
 
+    @Override
+    public void createProfile(UserPrivate userPrivate) {
+        String profileName = userPrivate.display_name;
+        String profilePicture = userPrivate.images.get(0).url;
+        prefs.edit()
+                .putString("profile name", profileName)
+                .putString("profile picture url", profilePicture)
+                .apply();
+
+        mProfileName.setText(profileName);
+        Picasso.with(this).load(profilePicture).into(mProfilePicture);
+    }
 
     private class SimpleFragmentPageAdapter extends FragmentStatePagerAdapter {
 
