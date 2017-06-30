@@ -5,6 +5,8 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.stream.jerye.queue.PlayerService;
+
 import java.util.List;
 
 import kaaes.spotify.webapi.android.SpotifyApi;

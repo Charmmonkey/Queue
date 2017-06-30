@@ -1,4 +1,4 @@
-package com.stream.jerye.queue.MusicPage;
+package com.stream.jerye.queue;
 
 import android.app.Service;
 import android.content.Context;
@@ -17,8 +17,8 @@ public class PlayerService extends Service {
     }
 
     public class PlayerBinder extends Binder {
-        public QueuePlayer getService(Context context, MusicQueueListener musicQueueListener, String spotifyAccessToken) {
-            mQueuePlayer = new MultiMediaPlayer(context, musicQueueListener, spotifyAccessToken);
+        public QueuePlayer getService(Context context, MusicPlayerListener musicPlayerListener, String spotifyAccessToken) {
+            mQueuePlayer = new MultiMediaPlayer(context, musicPlayerListener, spotifyAccessToken);
             return mQueuePlayer;
         }
     }

@@ -86,7 +86,9 @@ public class FirebaseEventBus {
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                     Log.d(TAG, "peeked");
-                    list.add(dataSnapshot.getValue(SimpleTrack.class));
+                    SimpleTrack track = dataSnapshot.getValue(SimpleTrack.class);
+                    track.setKey(dataSnapshot.getKey());
+                    list.add(track);
                     if(list.size()==2){
                         mFirebasePeekHandler.peekedResult(list);
                     }
@@ -110,8 +112,8 @@ public class FirebaseEventBus {
             });
         }
 
-        public void remove(){
-//            mMusicDatabaseReference.
+        public void remove(SimpleTrack track){
+            mMusicDatabaseReference.child(track.getKey()).removeValue();
         }
     }
 

@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:weightSum="1"
-        tools:context="com.stream.jerye.queue.MainActivity">
+        tools:context="com.stream.jerye.queue.RoomActivity">
 
         <android.support.v4.view.ViewPager
             android:id="@+id/view_pager"

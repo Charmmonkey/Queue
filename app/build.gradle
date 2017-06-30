@@ -35,7 +35,6 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-//    compile 'com.spotify.sdk:spotify-player-24-noconnect-2.20b@aar'
     compile 'com.spotify.sdk:spotify-player:1.0.0-beta13@aar'
     compile 'com.spotify.sdk:spotify-auth:1.0.0-beta13@aar'
 

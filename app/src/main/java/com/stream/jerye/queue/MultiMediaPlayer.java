@@ -1,12 +1,10 @@
-package com.stream.jerye.queue.MusicPage;
+package com.stream.jerye.queue;
 
 import android.content.Context;
 import android.content.UriMatcher;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.spotify.sdk.android.player.Config;
@@ -16,9 +14,9 @@ import com.spotify.sdk.android.player.PlayerNotificationCallback;
 import com.spotify.sdk.android.player.PlayerState;
 import com.spotify.sdk.android.player.PlayerStateCallback;
 import com.spotify.sdk.android.player.Spotify;
-import com.stream.jerye.queue.MainActivity;
+import com.stream.jerye.queue.MusicPage.SimpleTrack;
 
-import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MultiMediaPlayer implements QueuePlayer,
@@ -30,19 +28,17 @@ public class MultiMediaPlayer implements QueuePlayer,
     private static final String TAG = MultiMediaPlayer.class.getSimpleName();
 
     private MediaPlayer mMediaPlayer;
-    private String mCurrentTrack;
-    private String mNextTrackUrl;
+    private SimpleTrack mCurrentTrack;
+    private SimpleTrack mNextTrack;
     private Player mSpotifyPlayer;
     private String mSpotifyAccessToken;
-    private MusicQueueListener mMusicQueueListener;
+    private MusicPlayerListener mMusicPlayerListener;
     private Context mContext;
     private Handler mHandler = null;
     private MediaObserver mMediaObserver = null;
     private int mPositionInMs;
-    private int mDurationInMs;
     private static boolean spotifyPlayerIsPlaying = false;
     private static boolean spotifyPlayerIsPaused = false;
-    private static boolean spotifyPlayerIsFresh = false;
 
 
     private static final int GENERAL_AUDIO_URL = 1;
@@ -56,24 +52,9 @@ public class MultiMediaPlayer implements QueuePlayer,
     }
 
 
-    private class OnPreparedListener implements MediaPlayer.OnPreparedListener {
-
-        private final String mUrl;
-
-        public OnPreparedListener(String url) {
-            mUrl = url;
-        }
-
-        @Override
-        public void onPrepared(MediaPlayer mp) {
-            mp.start();
-            mCurrentTrack = mUrl;
-        }
-    }
-
-    public MultiMediaPlayer(Context context, MusicQueueListener musicQueueListener, String spotifyAccessToken) {
+    public MultiMediaPlayer(Context context, MusicPlayerListener musicPlayerListener, String spotifyAccessToken) {
         mContext = context;
-        mMusicQueueListener = musicQueueListener;
+        mMusicPlayerListener = musicPlayerListener;
         mSpotifyAccessToken = spotifyAccessToken;
     }
 
@@ -81,39 +62,18 @@ public class MultiMediaPlayer implements QueuePlayer,
     public void onCompletion(MediaPlayer mp) {
 
         Log.d(TAG, "onCompletion");
-        mMusicQueueListener.dequeue();
 
         release();
     }
 
     @Override
-    public void play(String url) {
-        Log.d("MainActivity.java", "pressed play: " + url);
-
-        mCurrentTrack = url;
-        if (url.contains("spotify")) {
-            if (mSpotifyPlayer != null) {
-                mSpotifyPlayer.pause();
-            }
-            Log.d("MainActivity.java", "creating spotify player " + url);
-
-
-            createSpotifyAudioPlayer();
-
-
-        } else {
-            if (mMediaPlayer != null) {
-                mMediaPlayer.release();
-            }
-
-            try {
-                Log.d("MainActivity.java", "Playing: " + url);
-                createAndroidMediaPlayer(url);
-                mCurrentTrack = url;
-            } catch (IOException e) {
-                Log.e(TAG, "Could not play: " + url, e);
-            }
+    public void play() {
+        if (mSpotifyPlayer != null) {
+            mSpotifyPlayer.pause();
         }
+        Log.d("MainActivity.java", "creating spotify player " + mCurrentTrack);
+
+        createSpotifyAudioPlayer();
 
     }
 
@@ -124,9 +84,6 @@ public class MultiMediaPlayer implements QueuePlayer,
             mSpotifyPlayer.pause();
 
         }
-//        if (mMediaPlayer != null) {
-//            mMediaPlayer.pause();
-//        }
     }
 
     @Override
@@ -145,9 +102,6 @@ public class MultiMediaPlayer implements QueuePlayer,
             mSpotifyPlayer.resume();
 
         }
-//        if (mMediaPlayer != null) {
-//            mMediaPlayer.start();
-//        }
     }
 
     @Override
@@ -157,16 +111,14 @@ public class MultiMediaPlayer implements QueuePlayer,
 
     @Override
     public void next() {
-        if (mSpotifyPlayer != null && mNextTrackUrl != null) {
-            mSpotifyPlayer.skipToNext();
-
+        if (mSpotifyPlayer != null && mCurrentTrack != null) {
+            playTrack(mCurrentTrack);
         }
     }
 
     @Override
     public boolean isPlaying() {
         return mSpotifyPlayer != null && (spotifyPlayerIsPlaying && !spotifyPlayerIsPaused);
-//                (mMediaPlayer != null && mMediaPlayer.isPlaying());
     }
 
     @Override
@@ -175,31 +127,28 @@ public class MultiMediaPlayer implements QueuePlayer,
     }
 
     @Override
-    @Nullable
-    public String getCurrentTrack() {
-        return mCurrentTrack;
-    }
-
-    @Override
-    public void setNextTrack(String nextTrackUrl) {
-        mNextTrackUrl = nextTrackUrl;
-    }
-
-    private void createAndroidMediaPlayer(String url) throws IOException {
-        //Android MediaPlayer
-        mMediaPlayer = new MediaPlayer();
-        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        mMediaPlayer.setDataSource(url);
-        mMediaPlayer.setOnPreparedListener(new OnPreparedListener(url));
-        mMediaPlayer.setOnCompletionListener(this);
-        mMediaPlayer.prepareAsync();
+    public void setNextTrack(List<SimpleTrack> currentAndNextSong) {
+        mCurrentTrack = currentAndNextSong.get(0);
+        mNextTrack = currentAndNextSong.get(1);
 
     }
+
+
+//    private void createAndroidMediaPlayer(String url) throws IOException {
+//        //Android MediaPlayer
+//        mMediaPlayer = new MediaPlayer();
+//        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+//        mMediaPlayer.setDataSource(url);
+//        mMediaPlayer.setOnPreparedListener(new OnPreparedListener(url));
+//        mMediaPlayer.setOnCompletionListener(this);
+//        mMediaPlayer.prepareAsync();
+//
+//    }
 
 
     private void createSpotifyAudioPlayer() {
         //SpotifyMusicPlayer
-        Config playerConfig = new Config(mContext, mSpotifyAccessToken, MainActivity.CLIENT_ID);
+        Config playerConfig = new Config(mContext, mSpotifyAccessToken, RoomActivity.CLIENT_ID);
 
         Spotify.getPlayer(playerConfig, this, new Player.InitializationObserver() {
             @Override
@@ -220,9 +169,7 @@ public class MultiMediaPlayer implements QueuePlayer,
     @Override
     public void onLoggedIn() {
         Log.d(TAG, "logged in");
-        mSpotifyPlayer.play(mCurrentTrack);
-        mSpotifyPlayer.queue(mNextTrackUrl);
-        mMusicQueueListener.dequeue();
+        playTrack(mCurrentTrack);
         mHandler = new Handler(Looper.getMainLooper());
         mMediaObserver = new MediaObserver();
 
@@ -234,6 +181,7 @@ public class MultiMediaPlayer implements QueuePlayer,
 
     @Override
     public void onLoginFailed(Throwable throwable) {
+        Log.d(TAG, throwable.toString());
     }
 
 
@@ -249,8 +197,6 @@ public class MultiMediaPlayer implements QueuePlayer,
 
     @Override
     public void onPlaybackEvent(EventType eventType, PlayerState playerState) {
-
-
         Log.d(TAG, "event type: " + eventType);
         if (eventType.equals(EventType.PLAY)) {
             spotifyPlayerIsPlaying = true;
@@ -259,15 +205,13 @@ public class MultiMediaPlayer implements QueuePlayer,
             mHandler.postDelayed(mMediaObserver, 250);
 
         } else if (eventType.equals(EventType.AUDIO_FLUSH)) {
-            mSpotifyPlayer.getPlayerState(this);
-            mMusicQueueListener.getSongDuration(mDurationInMs);
         } else if (eventType.equals(EventType.PAUSE)) {
             spotifyPlayerIsPaused = true;
             spotifyPlayerIsPlaying = false;
             mMediaObserver.stop();
         } else if (eventType.equals(EventType.END_OF_CONTEXT)) {
-            mSpotifyPlayer.queue(mNextTrackUrl);
-//            mMusicQueueListener.dequeue();
+            playTrack(mNextTrack);
+            mMusicPlayerListener.queueNextSong(mCurrentTrack);
         }
     }
 
@@ -278,7 +222,6 @@ public class MultiMediaPlayer implements QueuePlayer,
     @Override
     public void onPlayerState(PlayerState playerState) {
         mPositionInMs = playerState.positionInMs;
-        mDurationInMs = playerState.durationInMs;
     }
 
     private class MediaObserver implements Runnable {
@@ -296,9 +239,15 @@ public class MultiMediaPlayer implements QueuePlayer,
         public void run() {
             if (!stop.get()) {
                 mSpotifyPlayer.getPlayerState(MultiMediaPlayer.this);
-                mMusicQueueListener.getSongProgress(mPositionInMs);
+                mMusicPlayerListener.getSongProgress(mPositionInMs);
                 mHandler.postDelayed(mMediaObserver, 250);
             }
         }
+    }
+
+    private void playTrack(SimpleTrack track) {
+        mSpotifyPlayer.play(track.getTrack());
+        mMusicPlayerListener.getSongDuration((int) track.getDurationInMS());
+        Log.d(TAG, "duration: " + track.getDurationInMS());
     }
 }

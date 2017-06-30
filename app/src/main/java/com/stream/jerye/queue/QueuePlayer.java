@@ -1,10 +1,12 @@
-package com.stream.jerye.queue.MusicPage;
+package com.stream.jerye.queue;
 
-import android.support.annotation.Nullable;
+import com.stream.jerye.queue.MusicPage.SimpleTrack;
+
+import java.util.List;
 
 public interface QueuePlayer {
 
-    void play(String url);
+    void play();
 
     void pause();
 
@@ -18,12 +20,9 @@ public interface QueuePlayer {
 
     boolean isPaused();
 
-    @Nullable
-    String getCurrentTrack();
-
     void release();
 
-    void setNextTrack(String url);
+    void setNextTrack(List<SimpleTrack> currentAndNextSong);
 
 
 }

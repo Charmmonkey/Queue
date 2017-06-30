@@ -27,9 +27,6 @@ import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.squareup.picasso.Picasso;
 import com.stream.jerye.queue.MessagePage.MessageFragment;
 import com.stream.jerye.queue.MusicPage.MusicFragment;
-import com.stream.jerye.queue.MusicPage.MusicQueueListener;
-import com.stream.jerye.queue.MusicPage.PlayerService;
-import com.stream.jerye.queue.MusicPage.QueuePlayer;
 import com.stream.jerye.queue.MusicPage.SimpleTrack;
 import com.stream.jerye.queue.profile.SpotifyProfile;
 
@@ -39,8 +36,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import kaaes.spotify.webapi.android.models.UserPrivate;
 
-public class MainActivity extends AppCompatActivity implements
-        MusicQueueListener,
+public class RoomActivity extends AppCompatActivity implements
+        MusicPlayerListener,
         FirebaseEventBus.FirebasePeekHandler,
         SpotifyProfile.SpotifyProfileCallback {
     public static final String CLIENT_ID = "06a251bae8ae4881bb0022223b960c1d";
@@ -58,7 +55,9 @@ public class MainActivity extends AppCompatActivity implements
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.d(TAG, "Service Connected");
-            mPlayer = ((PlayerService.PlayerBinder) service).getService(MainActivity.this, MainActivity.this, mToken);
+            mPlayer = ((PlayerService.PlayerBinder) service).getService(RoomActivity.this, RoomActivity.this, mToken);
+            Log.d(TAG, "peeking from activity result");
+            mMusicDatabaseAccess.peek();
         }
 
         @Override
@@ -108,9 +107,6 @@ public class MainActivity extends AppCompatActivity implements
         playToPause = (AnimatedVectorDrawable) getDrawable(R.drawable.avd_play_to_pause);
         pauseToPlay = (AnimatedVectorDrawable) getDrawable(R.drawable.avd_pause_to_play);
 
-        mMusicDatabaseAccess.peek();
-
-
     }
 
     @Override
@@ -126,22 +122,21 @@ public class MainActivity extends AppCompatActivity implements
                     Log.d("MainActivity.java", "mPlayer is null");
                     return;
                 }
-                if (mQueuedTracks != null) {
-                    if (mPlayer.isPaused()) {
-                        mPlayer.resume();
-                        mPlayButton.setImageDrawable(playToPause);
-                        playToPause.start();
-                    } else if (mPlayer.isPlaying()) {
-                        mPlayer.pause();
-                        mPlayButton.setImageDrawable(pauseToPlay);
-                        pauseToPlay.start();
-                    } else {
-                        mPlayer.setNextTrack(mQueuedTracks.get(1).getTrack());
-                        mPlayer.play(mQueuedTracks.get(0).getTrack());
-                        mPlayButton.setImageDrawable(playToPause);
-                        playToPause.start();
-                    }
+
+                if (mPlayer.isPaused()) {
+                    mPlayer.resume();
+                    mPlayButton.setImageDrawable(playToPause);
+                    playToPause.start();
+                } else if (mPlayer.isPlaying()) {
+                    mPlayer.pause();
+                    mPlayButton.setImageDrawable(pauseToPlay);
+                    pauseToPlay.start();
+                } else {
+                    mPlayer.play();
+                    mPlayButton.setImageDrawable(playToPause);
+                    playToPause.start();
                 }
+
 
             }
         });
@@ -193,9 +188,10 @@ public class MainActivity extends AppCompatActivity implements
             if (response.getType() == AuthenticationResponse.Type.TOKEN) {
                 Log.d("MainActivity.java", "type: " + response.getType());
                 mToken = response.getAccessToken();
-                bindService(PlayerService.getIntent(this), mServiceConnection, Activity.BIND_AUTO_CREATE);
 
                 prefs.edit().putString("token", mToken).apply();
+
+                bindService(PlayerService.getIntent(this), mServiceConnection, Activity.BIND_AUTO_CREATE);
 
                 mPager.setAdapter(new SimpleFragmentPageAdapter(getSupportFragmentManager()));
 
@@ -248,31 +244,11 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void peekedResult(List<SimpleTrack> list) {
-        mQueuedTracks = list;
-        Log.d(TAG, mQueuedTracks.toString());
-    }
-
-    @Override
-    public void dequeue() {
-//        Log.d("MainActivity.java", "QueueListener dequeue");
-//
-//
-//        String current = mQueueMusicAdapter.peek();
-//        Log.d("MainActivity.java", "current music: " + current);
-//
-//
-//        mQueueMusicAdapter.dequeue(); //reroute to db eventually.
-//
-//        //
-//        mCurrentMusicView.setText(current);
-//
-//        if (mQueueMusicAdapter.getItemCount() > 0)
-//            mPlayer.setNextTrack(mQueueMusicAdapter.peekMore());
+        mPlayer.setNextTrack(list);
     }
 
     @Override
     public void getSongProgress(int positionInMs) {
-        Log.d(TAG, "player state called");
         mSeekBar.setProgress(positionInMs);
         int totalInS = positionInMs / 1000;
         int minutes = totalInS / 60;
@@ -290,6 +266,14 @@ public class MainActivity extends AppCompatActivity implements
         int seconds = totalInS % 60;
         mMusicDuration.setText(minutes + ":" + (seconds < 10 ? "0" : "") + seconds);
     }
+
+    @Override
+    public void queueNextSong(SimpleTrack oldTrackToRemove) {
+        Log.d(TAG, "queueNextSong called from player context end");
+        mMusicDatabaseAccess.remove(oldTrackToRemove);
+        mMusicDatabaseAccess.peek();
+    }
+
 
     @Override
     protected void onStop() {

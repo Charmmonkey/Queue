@@ -13,6 +13,7 @@ public class SimpleTrack {
     private String artistName;
     private transient String key;
     private String albumImage;
+    private long durationInMS;
 
     public SimpleTrack() {
     }
@@ -22,6 +23,7 @@ public class SimpleTrack {
         this.name = track.name;
         this.artistName = track.artists.toString();
         this.albumImage = track.album.uri;
+        this.durationInMS = track.duration_ms;
 
     }
 
@@ -64,4 +66,10 @@ public class SimpleTrack {
     public void setAlbumImage(String albumImage) {
         this.albumImage = albumImage;
     }
+
+    public long getDurationInMS(){
+        return durationInMS;
+    }
+
+    public void setDurationInMS(long durationInMS){this.durationInMS = durationInMS;}
 }
