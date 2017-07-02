@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
@@ -28,6 +29,7 @@ import com.squareup.picasso.Picasso;
 import com.stream.jerye.queue.MessagePage.MessageFragment;
 import com.stream.jerye.queue.MusicPage.MusicFragment;
 import com.stream.jerye.queue.MusicPage.SimpleTrack;
+import com.stream.jerye.queue.firebase.FirebaseEventBus;
 import com.stream.jerye.queue.profile.SpotifyProfile;
 
 import java.util.List;
@@ -46,7 +48,7 @@ public class RoomActivity extends AppCompatActivity implements
     private QueuePlayer mPlayer;
     private String TAG = "MainActivity.java";
     private String mToken;
-    private SharedPreferences prefs;
+    private static SharedPreferences prefs;
     private AnimatedVectorDrawable playToPause;
     private AnimatedVectorDrawable pauseToPlay;
     private FirebaseEventBus.MusicDatabaseAccess mMusicDatabaseAccess = new FirebaseEventBus.MusicDatabaseAccess(this);
@@ -88,13 +90,16 @@ public class RoomActivity extends AppCompatActivity implements
     TextView mProfileName;
     @BindView(R.id.profile_picture)
     ImageView mProfilePicture;
+    @BindView(R.id.profile_logout)
+    Button mProfileLogoutButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main_activity_layout);
+        setContentView(R.layout.room_activity);
         ButterKnife.bind(this);
         prefs = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
+
 
         AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
                 AuthenticationResponse.Type.TOKEN,
@@ -112,6 +117,8 @@ public class RoomActivity extends AppCompatActivity implements
     @Override
     protected void onStart() {
         super.onStart();
+
+        Log.d(TAG, "FirebaseInstanceId Token: " + FirebaseInstanceId.getInstance().getToken());
         mPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -173,7 +180,6 @@ public class RoomActivity extends AppCompatActivity implements
             }
         });
 
-
     }
 
     @Override
@@ -193,10 +199,10 @@ public class RoomActivity extends AppCompatActivity implements
 
                 bindService(PlayerService.getIntent(this), mServiceConnection, Activity.BIND_AUTO_CREATE);
 
-                mPager.setAdapter(new SimpleFragmentPageAdapter(getSupportFragmentManager()));
-
                 SpotifyProfile spotifyProfile = new SpotifyProfile(this, mToken);
                 spotifyProfile.getUserProfile();
+
+                mPager.setAdapter(new SimpleFragmentPageAdapter(getSupportFragmentManager()));
             }
         }
     }
@@ -205,9 +211,11 @@ public class RoomActivity extends AppCompatActivity implements
     public void createProfile(UserPrivate userPrivate) {
         String profileName = userPrivate.display_name;
         String profilePicture = userPrivate.images.get(0).url;
+        String profileId = userPrivate.id;
         prefs.edit()
                 .putString("profile name", profileName)
                 .putString("profile picture url", profilePicture)
+                .putString("profile id", profileId)
                 .apply();
 
         mProfileName.setText(profileName);
@@ -279,6 +287,11 @@ public class RoomActivity extends AppCompatActivity implements
     protected void onStop() {
         super.onStop();
         unbindService(mServiceConnection);
+
+    }
+
+    public void profileLogOut(View v){
+        AuthenticationClient.clearCookies(this);
 
     }
 }

@@ -1,4 +1,4 @@
-package com.stream.jerye.queue;
+package com.stream.jerye.queue.firebase;
 
 import android.util.Log;
 
@@ -157,4 +157,5 @@ public class FirebaseEventBus {
             mMessageDatabaseReference.push().setValue(message);
         }
     }
+
 }

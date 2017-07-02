@@ -16,7 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.stream.jerye.queue.FirebaseEventBus;
+import com.stream.jerye.queue.firebase.FirebaseEventBus;
 import com.stream.jerye.queue.R;
 
 import java.util.ArrayList;
@@ -60,11 +60,13 @@ public class MessageFragment extends Fragment implements FirebaseEventBus.Fireba
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(linearLayoutManager);
         messageList = new ArrayList<>();
-        mMessageAdapter = new MessageAdapter(getContext(), messageList);
-        mRecyclerView.setAdapter(mMessageAdapter);
 
         SharedPreferences prefs = getContext().getSharedPreferences(getContext().getPackageName(), Context.MODE_PRIVATE);
         mUsername = prefs.getString("profile name", "unknown");
+        mMessageAdapter = new MessageAdapter(getContext(), messageList);
+        mRecyclerView.setAdapter(mMessageAdapter);
+
+
 
         mEditText.addTextChangedListener(new TextWatcher() {
             @Override

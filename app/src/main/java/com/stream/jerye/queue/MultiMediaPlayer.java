@@ -112,7 +112,8 @@ public class MultiMediaPlayer implements QueuePlayer,
     @Override
     public void next() {
         if (mSpotifyPlayer != null && mCurrentTrack != null) {
-            playTrack(mCurrentTrack);
+            playTrack(mNextTrack);
+            mMusicPlayerListener.queueNextSong(mCurrentTrack);
         }
     }
 

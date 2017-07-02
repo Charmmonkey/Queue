@@ -101,7 +101,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/profile_logout"
-            android:text="Sign out"/>
+            android:text="Sign out"
+            android:onClick="profileLogOut"/>
 
 
     </LinearLayout>
