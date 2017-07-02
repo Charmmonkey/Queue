@@ -15,6 +15,7 @@ import com.spotify.sdk.android.player.PlayerState;
 import com.spotify.sdk.android.player.PlayerStateCallback;
 import com.spotify.sdk.android.player.Spotify;
 import com.stream.jerye.queue.MusicPage.SimpleTrack;
+import com.stream.jerye.queue.lobby.LobbyActivity;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -149,7 +150,7 @@ public class MultiMediaPlayer implements QueuePlayer,
 
     private void createSpotifyAudioPlayer() {
         //SpotifyMusicPlayer
-        Config playerConfig = new Config(mContext, mSpotifyAccessToken, RoomActivity.CLIENT_ID);
+        Config playerConfig = new Config(mContext, mSpotifyAccessToken, LobbyActivity.CLIENT_ID);
 
         Spotify.getPlayer(playerConfig, this, new Player.InitializationObserver() {
             @Override

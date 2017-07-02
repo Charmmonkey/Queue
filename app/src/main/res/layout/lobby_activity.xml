@@ -6,22 +6,35 @@
     android:layout_height="match_parent"
     tools:context="com.stream.jerye.queue.lobby.LobbyActivity">
 
+    <View
+        android:id="@+id/lobby_divider"
+        android:layout_width="3dp"
+        android:layout_height="80dp"
+        android:layout_centerInParent="true"
+        android:background="@android:color/darker_gray"/>
     <ImageView
         android:id="@+id/lobby_create_button"
         android:layout_width="wrap_content"
+        android:layout_toLeftOf="@id/lobby_divider"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:src="@drawable/ic_notifications_black_24dp"
-        android:onClick="createRoom"/>
+        android:src="@drawable/ic_notifications_black_24dp"/>
 
     <ImageView
         android:layout_centerVertical="true"
         android:id="@+id/lobby_join_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/lobby_create_button"
-        android:src="@drawable/ic_play"
-        android:onClick="joinRoom"/>
+        android:layout_toRightOf="@id/lobby_divider"
+        android:src="@drawable/ic_play"/>
+
+    <Button
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Log In"
+        android:onClick="loginButton"/>
 
 
 </RelativeLayout>

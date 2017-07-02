@@ -93,7 +93,6 @@ public class MessageFragment extends Fragment implements FirebaseEventBus.Fireba
             }
         });
 
-
         return mRootView;
     }
 
@@ -101,7 +100,7 @@ public class MessageFragment extends Fragment implements FirebaseEventBus.Fireba
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mMessageDatabaseAccess = new FirebaseEventBus.MessageDatabaseAccess(this);
+        mMessageDatabaseAccess = new FirebaseEventBus.MessageDatabaseAccess(getContext(),this);
         mMessageDatabaseAccess.addChildListener();
     }
 

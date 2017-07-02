@@ -3,7 +3,6 @@ package com.stream.jerye.queue;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.drawable.AnimatedVectorDrawable;
@@ -22,9 +21,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.google.firebase.iid.FirebaseInstanceId;
-import com.spotify.sdk.android.authentication.AuthenticationClient;
-import com.spotify.sdk.android.authentication.AuthenticationRequest;
-import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.squareup.picasso.Picasso;
 import com.stream.jerye.queue.MessagePage.MessageFragment;
 import com.stream.jerye.queue.MusicPage.MusicFragment;
@@ -42,13 +38,10 @@ public class RoomActivity extends AppCompatActivity implements
         MusicPlayerListener,
         FirebaseEventBus.FirebasePeekHandler,
         SpotifyProfile.SpotifyProfileCallback {
-    public static final String CLIENT_ID = "06a251bae8ae4881bb0022223b960c1d";
-    private static final String REDIRECT_URI = "https://en.wikipedia.org/wiki/Whitelist";
-    private static final int REQUEST_CODE = 42;
     private QueuePlayer mPlayer;
     private String TAG = "MainActivity.java";
-    private String mToken;
     private static SharedPreferences prefs;
+    private String mToken;
     private AnimatedVectorDrawable playToPause;
     private AnimatedVectorDrawable pauseToPlay;
     private FirebaseEventBus.MusicDatabaseAccess mMusicDatabaseAccess;
@@ -98,19 +91,19 @@ public class RoomActivity extends AppCompatActivity implements
         setContentView(R.layout.room_activity);
         ButterKnife.bind(this);
         prefs = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
+        mToken = prefs.getString("token", "");
 
         mMusicDatabaseAccess = new FirebaseEventBus.MusicDatabaseAccess(this,this);
 
-        AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
-                AuthenticationResponse.Type.TOKEN,
-                REDIRECT_URI);
-        builder.setScopes(new String[]{"user-read-private", "streaming"});
-        AuthenticationRequest request = builder.build();
-
-        AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
-
         playToPause = (AnimatedVectorDrawable) getDrawable(R.drawable.avd_play_to_pause);
         pauseToPlay = (AnimatedVectorDrawable) getDrawable(R.drawable.avd_pause_to_play);
+
+        bindService(PlayerService.getIntent(this), mServiceConnection, Activity.BIND_AUTO_CREATE);
+
+        mPager.setAdapter(new SimpleFragmentPageAdapter(getSupportFragmentManager()));
+
+        SpotifyProfile spotifyProfile = new SpotifyProfile(this, mToken);
+        spotifyProfile.getUserProfile();
 
     }
 
@@ -182,30 +175,6 @@ public class RoomActivity extends AppCompatActivity implements
 
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-        Log.d("MainActivity.java", "onActivityResult: " + requestCode);
-
-        if (requestCode == REQUEST_CODE) {
-            Log.d("MainActivity.java", "requestcode");
-
-            AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
-            if (response.getType() == AuthenticationResponse.Type.TOKEN) {
-                Log.d("MainActivity.java", "type: " + response.getType());
-                mToken = response.getAccessToken();
-
-                prefs.edit().putString("token", mToken).apply();
-
-                bindService(PlayerService.getIntent(this), mServiceConnection, Activity.BIND_AUTO_CREATE);
-
-                SpotifyProfile spotifyProfile = new SpotifyProfile(this, mToken);
-                spotifyProfile.getUserProfile();
-
-                mPager.setAdapter(new SimpleFragmentPageAdapter(getSupportFragmentManager()));
-            }
-        }
-    }
 
     @Override
     public void createProfile(UserPrivate userPrivate) {
@@ -290,8 +259,5 @@ public class RoomActivity extends AppCompatActivity implements
 
     }
 
-    public void profileLogOut(View v){
-        AuthenticationClient.clearCookies(this);
 
-    }
 }

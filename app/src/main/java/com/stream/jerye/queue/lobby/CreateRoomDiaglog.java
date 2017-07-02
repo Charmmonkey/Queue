@@ -7,10 +7,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.stream.jerye.queue.R;
 import com.stream.jerye.queue.RoomActivity;
@@ -37,9 +38,7 @@ public class CreateRoomDiaglog extends DialogFragment {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.create_room_dialog, null);
+        final View dialogView = getActivity().getLayoutInflater().inflate(R.layout.create_room_dialog, null);
         ButterKnife.bind(this, dialogView);
 
         roomTitleEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -54,23 +53,9 @@ public class CreateRoomDiaglog extends DialogFragment {
                 return true;
             }
         });
-
         builder.setView(dialogView)
                 .setPositiveButton(R.string.dialog_create, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        mRoomTitle = roomTitleEditText.getText().toString();
-                        mRoomPassword = roomPasswordEditText.getText().toString();
-
-                        if (mRoomTitle != null) {
-
-                            FirebaseEventBus.RoomDatabaseAccess roomDatabaseAccess = new FirebaseEventBus.RoomDatabaseAccess(getActivity());
-                            roomDatabaseAccess.push(mRoomTitle, mRoomPassword);
-
-                            Intent intent = new Intent(getActivity(), RoomActivity.class)
-                                    .putExtra("title",mRoomTitle)
-                                    .putExtra("password",mRoomPassword);
-                            startActivity(intent);
-                        }
 
                     }
                 })
@@ -80,9 +65,40 @@ public class CreateRoomDiaglog extends DialogFragment {
                     }
                 });
 
-        AlertDialog dialog = builder.create();
 
-        return dialog;
+        return builder.create();
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        final AlertDialog alertDialog = (AlertDialog) getDialog();
+        if (alertDialog != null) {
+            Button positiveButton = alertDialog.getButton(Dialog.BUTTON_POSITIVE);
+            positiveButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mRoomTitle = roomTitleEditText.getText().toString();
+                    mRoomPassword = roomPasswordEditText.getText().toString();
+
+                    if (!mRoomTitle.equals("")) {
+
+                        FirebaseEventBus.RoomDatabaseAccess roomDatabaseAccess = new FirebaseEventBus.RoomDatabaseAccess(getActivity());
+                        roomDatabaseAccess.push(mRoomTitle, mRoomPassword);
+
+                        Intent intent = new Intent(getActivity(), RoomActivity.class)
+                                .putExtra("title", mRoomTitle)
+                                .putExtra("password", mRoomPassword);
+                        startActivity(intent);
+
+                        alertDialog.dismiss();
+                    } else {
+                        Toast.makeText(getActivity(), "Room title Cannot be blank!", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
     }
 }

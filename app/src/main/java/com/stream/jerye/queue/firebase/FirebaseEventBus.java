@@ -155,11 +155,21 @@ public class FirebaseEventBus {
 
     public static class MessageDatabaseAccess {
         private FirebaseMessageHandler mFirebaseMessageHandler;
+        private Context mContext;
+        private SharedPreferences prefs;
 
-        public MessageDatabaseAccess(FirebaseMessageHandler firebaseMessageHandler) {
+        public MessageDatabaseAccess(Context context, FirebaseMessageHandler firebaseMessageHandler) {
+            mContext = context;
             mFirebaseDatabase = FirebaseDatabase.getInstance();
-            mMessageDatabaseReference = mFirebaseDatabase.getReference().child("messages");
             mFirebaseMessageHandler = firebaseMessageHandler;
+            prefs = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
+            String roomKey = prefs.getString("room key", "");
+            if(!roomKey.equals("")){
+                mMessageDatabaseReference = mFirebaseDatabase.getReference().child(roomKey).child("messages");
+            }else{
+                Log.e(TAG, "invalid room key");
+            }
+
         }
 
         public void addChildListener() {
