@@ -51,8 +51,7 @@ public class RoomActivity extends AppCompatActivity implements
     private static SharedPreferences prefs;
     private AnimatedVectorDrawable playToPause;
     private AnimatedVectorDrawable pauseToPlay;
-    private FirebaseEventBus.MusicDatabaseAccess mMusicDatabaseAccess = new FirebaseEventBus.MusicDatabaseAccess(this);
-    private static List<SimpleTrack> mQueuedTracks;
+    private FirebaseEventBus.MusicDatabaseAccess mMusicDatabaseAccess;
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -100,6 +99,7 @@ public class RoomActivity extends AppCompatActivity implements
         ButterKnife.bind(this);
         prefs = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
 
+        mMusicDatabaseAccess = new FirebaseEventBus.MusicDatabaseAccess(this,this);
 
         AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
                 AuthenticationResponse.Type.TOKEN,

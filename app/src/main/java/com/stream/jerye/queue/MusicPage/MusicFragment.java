@@ -35,7 +35,7 @@ public class MusicFragment extends Fragment implements Search.View, FirebaseEven
     private Search.ActionListener mActionListener;
     private String TAG = "MainActivity.java";
     private String mSpotifyAccessToken;
-    private FirebaseEventBus.MusicDatabaseAccess mMusicDatabaseAccess = new FirebaseEventBus.MusicDatabaseAccess(this);
+    private FirebaseEventBus.MusicDatabaseAccess mMusicDatabaseAccess;
 
 
     public MusicFragment() {
@@ -114,6 +114,7 @@ public class MusicFragment extends Fragment implements Search.View, FirebaseEven
         SharedPreferences prefs = getContext().getSharedPreferences(getContext().getPackageName(), Context.MODE_PRIVATE);
         mSpotifyAccessToken = prefs.getString("token", "");
 
+        mMusicDatabaseAccess = new FirebaseEventBus.MusicDatabaseAccess(getContext(),this);
         mMusicDatabaseAccess.addChildListener();
 
         mActionListener = new SearchPresenter(getContext(), this);
