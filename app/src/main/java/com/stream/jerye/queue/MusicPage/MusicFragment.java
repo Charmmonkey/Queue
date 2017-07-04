@@ -95,6 +95,16 @@ public class MusicFragment extends Fragment implements Search.View, FirebaseEven
                 return true;
             }
         });
+        mSearchView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(!hasFocus){
+                    mMusicResultsList.setVisibility(View.GONE);
+                }else{
+                    mMusicResultsList.setVisibility(View.VISIBLE);
+                }
+            }
+        });
 
         // Setup search results list
         mSearchResultsAdapter = new SearchResultsAdapter(getContext(), new SearchResultsAdapter.ItemSelectedListener() {

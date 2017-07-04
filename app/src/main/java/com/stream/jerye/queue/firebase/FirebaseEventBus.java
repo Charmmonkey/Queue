@@ -271,4 +271,20 @@ public class FirebaseEventBus {
         }
     }
 
+//    public class FirebaseMessagingAccess{
+//        private FirebaseMessaging mFirebaseMessaging;
+//
+//        public FirebaseMessagingAccess(){
+//            mFirebaseMessaging = FirebaseMessaging.getInstance();
+//        }
+//
+//        public void sendUpstreamMessage(){
+//            mFirebaseMessaging.send(new RemoteMessage.Builder(SENDER_ID + "@gcm.googleapis.com")
+//                    .setMessageId(Integer.toString(msgId.incrementAndGet()))
+//                    .addData("my_message", "Hello World")
+//                    .addData("my_action","SAY_HELLO")
+//                    .build());
+//        }
+//    }
+
 }
