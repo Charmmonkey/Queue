@@ -17,6 +17,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    buildTypes.each {
+        it.buildConfigField 'String', 'SPOTIFY_CLIENT_ID', SpotifyClientId
+        it.buildConfigField 'String', 'FIREBASE_SENDER_ID', FirebaseSenderId
+
+    }
 }
 
 repositories {

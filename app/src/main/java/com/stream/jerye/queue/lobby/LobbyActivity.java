@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
+import com.stream.jerye.queue.BuildConfig;
 import com.stream.jerye.queue.R;
 import com.stream.jerye.queue.RoomActivity;
 
@@ -21,7 +22,7 @@ import butterknife.ButterKnife;
 
 public class LobbyActivity extends AppCompatActivity {
     private String mToken;
-    public static final String CLIENT_ID = "06a251bae8ae4881bb0022223b960c1d";
+    public static final String CLIENT_ID = BuildConfig.SPOTIFY_CLIENT_ID;
     private static final String REDIRECT_URI = "https://en.wikipedia.org/wiki/Whitelist";
     private static final int REQUEST_CODE = 42;
     private SharedPreferences prefs;

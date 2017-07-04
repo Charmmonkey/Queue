@@ -9,12 +9,16 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.RemoteMessage;
+import com.stream.jerye.queue.BuildConfig;
 import com.stream.jerye.queue.MessagePage.Message;
 import com.stream.jerye.queue.MusicPage.SimpleTrack;
 import com.stream.jerye.queue.lobby.Room;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by jerye on 6/20/2017.
@@ -271,20 +275,21 @@ public class FirebaseEventBus {
         }
     }
 
-//    public class FirebaseMessagingAccess{
-//        private FirebaseMessaging mFirebaseMessaging;
-//
-//        public FirebaseMessagingAccess(){
-//            mFirebaseMessaging = FirebaseMessaging.getInstance();
-//        }
-//
-//        public void sendUpstreamMessage(){
-//            mFirebaseMessaging.send(new RemoteMessage.Builder(SENDER_ID + "@gcm.googleapis.com")
-//                    .setMessageId(Integer.toString(msgId.incrementAndGet()))
-//                    .addData("my_message", "Hello World")
-//                    .addData("my_action","SAY_HELLO")
-//                    .build());
-//        }
-//    }
+    public class FirebaseMessagingAccess{
+        private FirebaseMessaging mFirebaseMessaging;
+
+        public FirebaseMessagingAccess(){
+            mFirebaseMessaging = FirebaseMessaging.getInstance();
+        }
+
+        public void sendUpstreamMessage(){
+            AtomicInteger msgId = new AtomicInteger();
+            mFirebaseMessaging.send(new RemoteMessage.Builder(BuildConfig.FIREBASE_SENDER_ID + "@gcm.googleapis.com")
+                    .setMessageId(Integer.toString(msgId.incrementAndGet()))
+                    .addData("my_message", "Hello World")
+                    .addData("my_action","SAY_HELLO")
+                    .build());
+        }
+    }
 
 }
