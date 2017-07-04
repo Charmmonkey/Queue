@@ -5,8 +5,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
 import com.stream.jerye.queue.R;
 
 import java.util.ArrayList;
@@ -19,19 +21,24 @@ import java.util.List;
 public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.MusicQueueViewHolder> {
     private List<SimpleTrack> mItems = new ArrayList<>();
     private Context mContext;
+    private String singleTitle, singleArtist, singleAlbumImage;
+    private int noAlbumImageId = R.drawable.ic_pause;
 
     public MusicQueueAdapter(Context context) {
         mContext = context;
     }
 
     public class MusicQueueViewHolder extends RecyclerView.ViewHolder {
-        private TextView track;
+        private TextView title;
+        private TextView artist;
+        private ImageView albumImage;
 
         public MusicQueueViewHolder(View itemView) {
             super(itemView);
 
-            track = (TextView) itemView.findViewById(R.id.queued_music_url);
-
+            title = (TextView) itemView.findViewById(R.id.queued_music_name);
+            artist = (TextView) itemView.findViewById(R.id.queued_music_artists);
+            albumImage = (ImageView) itemView.findViewById(R.id.queued_music_album_image);
         }
     }
 
@@ -43,7 +50,23 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
 
     @Override
     public void onBindViewHolder(MusicQueueViewHolder holder, int position) {
-        holder.track.setText(mItems.get(position).getName());
+
+
+        singleTitle = mItems.get(position).getName() != null ? mItems.get(position).getName() : "Unknown";
+        singleArtist = mItems.get(position).getArtistName() != null ? mItems.get(position).getArtistName() : "Unknown";
+        singleAlbumImage = mItems.get(position).getAlbumImage() != null ? mItems.get(position).getAlbumImage() : "";
+
+
+        holder.title.setText(singleTitle);
+        holder.artist.setText(singleArtist);
+
+        if (singleAlbumImage.equals("")) {
+            Picasso.with(mContext).load(R.drawable.ic_pause).into(holder.albumImage);
+
+        } else {
+            Picasso.with(mContext).load(singleAlbumImage).into(holder.albumImage);
+        }
+
     }
 
     @Override
@@ -57,12 +80,12 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         notifyDataSetChanged();
     }
 
-    public void dequeue(){
+    public void dequeue() {
         mItems.remove(0);
         notifyItemRemoved(0);
     }
 
-    public void remove(int position){
+    public void remove(int position) {
         mItems.remove(position);
         notifyItemRemoved(position);
     }

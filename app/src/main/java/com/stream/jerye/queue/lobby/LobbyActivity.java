@@ -64,15 +64,15 @@ public class LobbyActivity extends AppCompatActivity {
 
                 prefs.edit().putString("token", mToken).apply();
 
-
+                mCreateRoomButton.setColorFilter(ContextCompat.getColor(this, R.color.colorPrimary));
                 mCreateRoomButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         new CreateRoomDiaglog().show(getFragmentManager(), "CreateRoomDialog");
                     }
                 });
-                mCreateRoomButton.setColorFilter(ContextCompat.getColor(this, R.color.colorPrimary));
 
+                mJoinRoomButton.setColorFilter(ContextCompat.getColor(this, R.color.colorPrimary));
                 mJoinRoomButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -86,8 +86,6 @@ public class LobbyActivity extends AppCompatActivity {
                         }
                     }
                 });
-
-                mJoinRoomButton.setColorFilter(ContextCompat.getColor(this, R.color.colorPrimary));
 
             }
         }

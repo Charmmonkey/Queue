@@ -1,19 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="40dp"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:paddingBottom="4dp"
     xmlns:tools="http://schemas.android.com/tools">
 
     <TextView
+        android:paddingTop="8dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="4dp"
         android:id="@+id/message_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         tools:text="Person Name"/>
 
     <TextView
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:paddingEnd="16dp"
+        android:paddingStart="16dp"
+        android:maxWidth="300dp"
         android:id="@+id/message_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textColor="@android:color/darker_gray"
+        android:background="@drawable/message_bubble_you"
         tools:text="Message for testing purposes to see margin and size"/>
 </LinearLayout>

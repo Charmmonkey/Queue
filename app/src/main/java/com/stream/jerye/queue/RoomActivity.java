@@ -3,6 +3,7 @@ package com.stream.jerye.queue;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.drawable.AnimatedVectorDrawable;
@@ -21,11 +22,13 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.squareup.picasso.Picasso;
 import com.stream.jerye.queue.MessagePage.MessageFragment;
 import com.stream.jerye.queue.MusicPage.MusicFragment;
 import com.stream.jerye.queue.MusicPage.SimpleTrack;
 import com.stream.jerye.queue.firebase.FirebaseEventBus;
+import com.stream.jerye.queue.lobby.LobbyActivity;
 import com.stream.jerye.queue.profile.SpotifyProfile;
 
 import java.util.List;
@@ -67,9 +70,7 @@ public class RoomActivity extends AppCompatActivity implements
     @BindView(R.id.play_button)
     ImageView mPlayButton;
     @BindView(R.id.next_button)
-    Button mNextButton;
-    @BindView(R.id.previous_button)
-    Button mPreviousButton;
+    ImageView mNextButton;
     @BindView(R.id.music_seekbar)
     SeekBar mSeekBar;
     @BindView(R.id.music_current)
@@ -93,7 +94,7 @@ public class RoomActivity extends AppCompatActivity implements
         prefs = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
         mToken = prefs.getString("token", "");
 
-        mMusicDatabaseAccess = new FirebaseEventBus.MusicDatabaseAccess(this,this);
+        mMusicDatabaseAccess = new FirebaseEventBus.MusicDatabaseAccess(this, this);
 
         playToPause = (AnimatedVectorDrawable) getDrawable(R.drawable.avd_play_to_pause);
         pauseToPlay = (AnimatedVectorDrawable) getDrawable(R.drawable.avd_pause_to_play);
@@ -104,6 +105,13 @@ public class RoomActivity extends AppCompatActivity implements
 
         SpotifyProfile spotifyProfile = new SpotifyProfile(this, mToken);
         spotifyProfile.getUserProfile();
+
+        Bundle bundle = getIntent().getExtras();
+        try {
+            getActionBar().setTitle(bundle.getString("room title"));
+        } catch (NullPointerException nullPointerException) {
+            nullPointerException.printStackTrace();
+        }
 
     }
 
@@ -257,6 +265,20 @@ public class RoomActivity extends AppCompatActivity implements
         super.onStop();
         unbindService(mServiceConnection);
 
+    }
+
+    public void profileLogout(View v) {
+        AuthenticationClient.clearCookies(this);
+        prefs.edit()
+                .remove("token")
+                .remove("profile picture")
+                .remove("profile name")
+                .remove("profile id")
+                .remove("room key")
+                .apply();
+
+        Intent exit = new Intent(this, LobbyActivity.class);
+        startActivity(exit);
     }
 
 

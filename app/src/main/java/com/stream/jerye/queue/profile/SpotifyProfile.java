@@ -1,5 +1,7 @@
 package com.stream.jerye.queue.profile;
 
+import android.util.Log;
+
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.UserPrivate;
@@ -30,12 +32,15 @@ public class SpotifyProfile {
         spotifyService.getMe(new Callback<UserPrivate>() {
             @Override
             public void success(UserPrivate userPrivate, Response response) {
+                Log.d("Spotify Profile", "success");
+
                 mSpotifyProfileCallback.createProfile(userPrivate);
             }
 
             @Override
             public void failure(RetrofitError error) {
                 mSpotifyProfileCallback.createProfile(null);
+                Log.d("Spotify Profile", error.toString());
             }
         });
     }

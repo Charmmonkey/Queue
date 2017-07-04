@@ -18,17 +18,17 @@ import com.stream.jerye.queue.R;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import kaaes.spotify.webapi.android.models.Track;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MusicFragment extends Fragment implements Search.View, FirebaseEventBus.FirebaseQueueAdapterHandler{
+public class MusicFragment extends Fragment implements Search.View, FirebaseEventBus.FirebaseQueueAdapterHandler {
     private LinearLayoutManager mResultsLayoutManager = new LinearLayoutManager(getContext()), mQueueLayoutManager = new LinearLayoutManager(getContext());
     private ScrollListener mScrollListener = new ScrollListener(mResultsLayoutManager);
     private SearchResultsAdapter mSearchResultsAdapter;
-    private SearchView mSearchView;
-    private RecyclerView mMusicResultsList, mMusicQueueList;
     private View mRootView;
     private MusicQueueAdapter mQueueMusicAdapter;
     private static final String KEY_CURRENT_QUERY = "CURRENT_QUERY";
@@ -37,6 +37,12 @@ public class MusicFragment extends Fragment implements Search.View, FirebaseEven
     private String mSpotifyAccessToken;
     private FirebaseEventBus.MusicDatabaseAccess mMusicDatabaseAccess;
 
+    @BindView(R.id.search_view)
+    SearchView mSearchView;
+    @BindView(R.id.search_results)
+    RecyclerView mMusicResultsList;
+    @BindView(R.id.music_queue)
+    RecyclerView mMusicQueueList;
 
     public MusicFragment() {
         // Required empty public constructor
@@ -68,9 +74,14 @@ public class MusicFragment extends Fragment implements Search.View, FirebaseEven
                              Bundle savedInstanceState) {
         Log.d(TAG, "music frag create view");
         mRootView = inflater.inflate(R.layout.music_fragment, container, false);
-
-        mSearchView = (SearchView) mRootView.findViewById(R.id.search_view);
+        ButterKnife.bind(this, mRootView);
         // Setup search field
+        mSearchView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mSearchView.setIconified(false);
+            }
+        });
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -80,16 +91,18 @@ public class MusicFragment extends Fragment implements Search.View, FirebaseEven
             @Override
             public boolean onQueryTextChange(String newText) {
                 mActionListener.search(newText);
+                mMusicResultsList.setVisibility(View.VISIBLE);
                 return true;
             }
         });
-        mMusicResultsList = (RecyclerView) mRootView.findViewById(R.id.search_results);
 
         // Setup search results list
         mSearchResultsAdapter = new SearchResultsAdapter(getContext(), new SearchResultsAdapter.ItemSelectedListener() {
             @Override
             public void onItemSelected(View itemView, Track item) {
                 mActionListener.selectTrack(item);
+                mMusicResultsList.setVisibility(View.GONE);
+                mSearchView.setQuery("",false);
             }
         });
 
@@ -98,7 +111,7 @@ public class MusicFragment extends Fragment implements Search.View, FirebaseEven
         mMusicResultsList.setAdapter(mSearchResultsAdapter);
         mMusicResultsList.addOnScrollListener(mScrollListener);
 
-        mMusicQueueList = (RecyclerView) mRootView.findViewById(R.id.music_queue);
+        mQueueLayoutManager.setReverseLayout(true);
         mMusicQueueList.setLayoutManager(mQueueLayoutManager);
         mQueueMusicAdapter = new MusicQueueAdapter(getContext());
         mMusicQueueList.setAdapter(mQueueMusicAdapter);
@@ -114,7 +127,7 @@ public class MusicFragment extends Fragment implements Search.View, FirebaseEven
         SharedPreferences prefs = getContext().getSharedPreferences(getContext().getPackageName(), Context.MODE_PRIVATE);
         mSpotifyAccessToken = prefs.getString("token", "");
 
-        mMusicDatabaseAccess = new FirebaseEventBus.MusicDatabaseAccess(getContext(),this);
+        mMusicDatabaseAccess = new FirebaseEventBus.MusicDatabaseAccess(getContext(), this);
         mMusicDatabaseAccess.addChildListener();
 
         mActionListener = new SearchPresenter(getContext(), this);
@@ -142,6 +155,7 @@ public class MusicFragment extends Fragment implements Search.View, FirebaseEven
     public void onTrackSelected(SimpleTrack simpleTrack) {
         Log.d("MainActivity.java", "onTrackSelected");
         mMusicDatabaseAccess.push(simpleTrack);
+
     }
 
     @Override

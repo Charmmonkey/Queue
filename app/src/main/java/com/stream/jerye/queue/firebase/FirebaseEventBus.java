@@ -25,7 +25,7 @@ public class FirebaseEventBus {
     private static DatabaseReference mMusicDatabaseReference, mMessageDatabaseReference, mRoomDatabaseReference;
     private static String TAG = "FirebaseEventBus.java";
 
-    public interface FirebasePeekHandler{
+    public interface FirebasePeekHandler {
         void peekedResult(List<SimpleTrack> list);
     }
 
@@ -37,8 +37,12 @@ public class FirebaseEventBus {
         void addMessage(Message message);
     }
 
+    public interface FirebaseRoomInfoHandler {
+        void checkPassword(String password);
+    }
 
-    public static class MusicDatabaseAccess{
+
+    public static class MusicDatabaseAccess {
         private FirebasePeekHandler mFirebasePeekHandler;
         private FirebaseQueueAdapterHandler mFirebaseQueueAdapterHandler;
         private Context mContext;
@@ -50,9 +54,9 @@ public class FirebaseEventBus {
             mFirebaseDatabase = FirebaseDatabase.getInstance();
             prefs = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
             String roomKey = prefs.getString("room key", "");
-            if(!roomKey.equals("")){
+            if (!roomKey.equals("")) {
                 mMusicDatabaseReference = mFirebaseDatabase.getReference().child(roomKey).child("tracks");
-            }else{
+            } else {
                 Log.e(TAG, "invalid room key");
             }
 
@@ -64,14 +68,15 @@ public class FirebaseEventBus {
             mFirebaseDatabase = FirebaseDatabase.getInstance();
             prefs = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
             String roomKey = prefs.getString("room key", "");
-            if(!roomKey.equals("")){
+            if (!roomKey.equals("")) {
                 mMusicDatabaseReference = mFirebaseDatabase.getReference().child(roomKey).child("tracks");
-                Log.e(TAG, "room key: "+ roomKey);
-                Log.e(TAG, "ref: "+ mMusicDatabaseReference.toString());
+                Log.e(TAG, "room key: " + roomKey);
+                Log.e(TAG, "ref: " + mMusicDatabaseReference.toString());
 
-            }else{
+            } else {
                 Log.e(TAG, "invalid room key");
-            }        }
+            }
+        }
 
         public void addChildListener() {
             mMusicDatabaseReference.addChildEventListener(new ChildEventListener() {
@@ -107,7 +112,7 @@ public class FirebaseEventBus {
         public void push(SimpleTrack simpleTrack) {
 
             mMusicDatabaseReference.push().setValue(simpleTrack);
-            Log.d(TAG,mMusicDatabaseReference.getRef().toString());
+            Log.d(TAG, mMusicDatabaseReference.getRef().toString());
 
         }
 
@@ -164,9 +169,9 @@ public class FirebaseEventBus {
             mFirebaseMessageHandler = firebaseMessageHandler;
             prefs = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
             String roomKey = prefs.getString("room key", "");
-            if(!roomKey.equals("")){
+            if (!roomKey.equals("")) {
                 mMessageDatabaseReference = mFirebaseDatabase.getReference().child(roomKey).child("messages");
-            }else{
+            } else {
                 Log.e(TAG, "invalid room key");
             }
 
@@ -211,6 +216,15 @@ public class FirebaseEventBus {
     public static class RoomDatabaseAccess {
         private Context mContext;
         private SharedPreferences prefs;
+        private FirebaseRoomInfoHandler mFirebaseRoomInfoHandler;
+
+        public RoomDatabaseAccess(Context context, FirebaseRoomInfoHandler firebaseRoomInfoHandler) {
+            mContext = context;
+            mFirebaseDatabase = FirebaseDatabase.getInstance();
+            mRoomDatabaseReference = mFirebaseDatabase.getReference();
+            mFirebaseRoomInfoHandler = firebaseRoomInfoHandler;
+            prefs = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
+        }
 
         public RoomDatabaseAccess(Context context) {
             mContext = context;
@@ -222,8 +236,38 @@ public class FirebaseEventBus {
         public void push(String roomTitle, String roomPassword) {
             Room newRoom = new Room(roomTitle, roomPassword);
             String roomKey = mRoomDatabaseReference.push().getKey();
-            prefs.edit().putString("room key",roomKey).apply();
+            prefs.edit().putString("room key", roomKey).apply();
             mRoomDatabaseReference.child(roomKey).setValue(newRoom);
+        }
+
+        public void getPassword() {
+            mRoomDatabaseReference.orderByChild("password").addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    String string = (String) dataSnapshot.getValue();
+                    mFirebaseRoomInfoHandler.checkPassword(string);
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
         }
     }
 

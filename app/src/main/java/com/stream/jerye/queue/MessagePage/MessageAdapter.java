@@ -33,9 +33,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         mPrefs = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
         params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.gravity = Gravity.END;
-
     }
-
 
     @Override
     public long getItemId(int position) {
@@ -45,17 +43,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     @Override
     public void onBindViewHolder(MessageViewHolder holder, int position) {
         String name = mMessageList.get(position).getName();
-        holder.messageName.setText(name);
         holder.messageContent.setText(mMessageList.get(position).getText());
+        holder.messageName.setText(name);
 
         if(mPrefs.getString("profile name", "").equals(name)){
             holder.messageName.setLayoutParams(params);
             holder.messageContent.setTextColor(Color.WHITE);
             holder.messageContent.setLayoutParams(params);
-            holder.messageContent.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorAccent));
-
+            holder.messageContent.setBackground(ContextCompat.getDrawable(mContext, R.drawable.message_bubble_me));
         }
-
     }
 
     @Override

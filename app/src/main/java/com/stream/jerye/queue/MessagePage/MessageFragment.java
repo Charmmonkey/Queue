@@ -13,11 +13,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 
-import com.stream.jerye.queue.firebase.FirebaseEventBus;
 import com.stream.jerye.queue.R;
+import com.stream.jerye.queue.firebase.FirebaseEventBus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +27,7 @@ import java.util.List;
  */
 public class MessageFragment extends Fragment implements FirebaseEventBus.FirebaseMessageHandler {
     private EditText mEditText;
-    private Button mMessageSendButton;
+    private ImageView mMessageSendButton;
     private String mUsername;
     private RecyclerView mRecyclerView;
     private MessageAdapter mMessageAdapter;
@@ -55,9 +55,10 @@ public class MessageFragment extends Fragment implements FirebaseEventBus.Fireba
                              Bundle savedInstanceState) {
         mRootView = inflater.inflate(R.layout.chat_fragment, container, false);
         mEditText = (EditText) mRootView.findViewById(R.id.edit_textbox);
-        mMessageSendButton = (Button) mRootView.findViewById(R.id.send_button);
+        mMessageSendButton = (ImageView) mRootView.findViewById(R.id.send_button);
         mRecyclerView = (RecyclerView) mRootView.findViewById(R.id.text);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        linearLayoutManager.setStackFromEnd(true);
         mRecyclerView.setLayoutManager(linearLayoutManager);
         messageList = new ArrayList<>();
 
