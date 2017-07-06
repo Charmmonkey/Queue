@@ -95,6 +95,8 @@ public class RoomActivity extends AppCompatActivity implements
         mToken = prefs.getString("token", "");
 
         mMusicDatabaseAccess = new FirebaseEventBus.MusicDatabaseAccess(this, this);
+        FirebaseEventBus.FirebaseMessagingAccess mFirebaseMessagingAccess = new FirebaseEventBus.FirebaseMessagingAccess();
+        mFirebaseMessagingAccess.sendUpstreamMessage();
 
         playToPause = (AnimatedVectorDrawable) getDrawable(R.drawable.avd_play_to_pause);
         pauseToPlay = (AnimatedVectorDrawable) getDrawable(R.drawable.avd_pause_to_play);
@@ -197,11 +199,12 @@ public class RoomActivity extends AppCompatActivity implements
 
         mProfileName.setText(profileName);
         Picasso.with(this).load(profilePicture).into(mProfilePicture);
+
     }
 
     private class SimpleFragmentPageAdapter extends FragmentStatePagerAdapter {
 
-        public SimpleFragmentPageAdapter(FragmentManager fm) {
+        private SimpleFragmentPageAdapter(FragmentManager fm) {
             super(fm);
         }
 
@@ -224,6 +227,7 @@ public class RoomActivity extends AppCompatActivity implements
         public int getItemPosition(Object object) {
             return super.getItemPosition(object);
         }
+
     }
 
 

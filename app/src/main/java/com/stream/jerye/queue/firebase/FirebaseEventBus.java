@@ -275,7 +275,7 @@ public class FirebaseEventBus {
         }
     }
 
-    public class FirebaseMessagingAccess{
+    public static class FirebaseMessagingAccess{
         private FirebaseMessaging mFirebaseMessaging;
 
         public FirebaseMessagingAccess(){
