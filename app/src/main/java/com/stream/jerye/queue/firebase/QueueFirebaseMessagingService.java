@@ -13,18 +13,15 @@ public class QueueFirebaseMessagingService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
         Log.d(TAG, "Notification Received");
+
+        if (remoteMessage.getNotification() != null) {
+            String msg = remoteMessage.getNotification().getBody();
+            Log.d(TAG, msg);
+
+            FirebaseEventBus.MessageDatabaseAccess mMessageDatabaseAccess = new FirebaseEventBus.MessageDatabaseAccess(this);
+            mMessageDatabaseAccess.push(msg,"");
+        }
     }
 
-    @Override
-    public void onMessageSent(String s) {
-        super.onMessageSent(s);
-        Log.d(TAG, "Message Sent");
 
-    }
-
-    @Override
-    public void onSendError(String s, Exception e) {
-        super.onSendError(s, e);
-        Log.d(TAG, "Message Error" + e.toString());
-    }
 }

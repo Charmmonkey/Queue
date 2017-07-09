@@ -29,6 +29,7 @@ const functions = require('firebase-functions');
         const newUser = event.data.child('name').val();
         console.log('newest user', newUser);
 
+        let msg = newUser.concat(' has joined the room!')
 
         return loadUsers(pushId).then(users => {
             let tokens = [];
@@ -40,7 +41,7 @@ const functions = require('firebase-functions');
             let payload = {
                 notification: {
                     title: 'Firebase Notification',
-                    body: 'hi',
+                    body: msg,
                     sound: 'default'
                 }
             };

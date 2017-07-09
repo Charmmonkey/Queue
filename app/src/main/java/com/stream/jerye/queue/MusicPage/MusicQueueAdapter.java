@@ -2,6 +2,7 @@ package com.stream.jerye.queue.MusicPage;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +24,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
     private Context mContext;
     private String singleTitle, singleArtist, singleAlbumImage;
     private int noAlbumImageId = R.drawable.ic_pause;
+    private String TAG = "MusicQueueAdapter";
 
     public MusicQueueAdapter(Context context) {
         mContext = context;
@@ -51,7 +53,6 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
     @Override
     public void onBindViewHolder(MusicQueueViewHolder holder, int position) {
 
-
         singleTitle = mItems.get(position).getName() != null ? mItems.get(position).getName() : "Unknown";
         singleArtist = mItems.get(position).getArtistName() != null ? mItems.get(position).getArtistName() : "Unknown";
         singleAlbumImage = mItems.get(position).getAlbumImage() != null ? mItems.get(position).getAlbumImage() : "";
@@ -66,7 +67,6 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
         } else {
             Picasso.with(mContext).load(singleAlbumImage).into(holder.albumImage);
         }
-
     }
 
     @Override
@@ -77,6 +77,7 @@ public class MusicQueueAdapter extends RecyclerView.Adapter<MusicQueueAdapter.Mu
 
     public void enqueue(SimpleTrack enqueuedMusic) {
         mItems.add(enqueuedMusic);
+        Log.d(TAG, "Music added");
         notifyDataSetChanged();
     }
 

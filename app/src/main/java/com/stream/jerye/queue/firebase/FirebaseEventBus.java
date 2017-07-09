@@ -79,6 +79,7 @@ public class FirebaseEventBus {
             }
         }
 
+        //Attach this to FirebaseQueueAdapterHandler implementation
         public void addChildListener() {
             mMusicDatabaseReference.addChildEventListener(new ChildEventListener() {
                 @Override
@@ -168,6 +169,19 @@ public class FirebaseEventBus {
             mContext = context;
             mFirebaseDatabase = FirebaseDatabase.getInstance();
             mFirebaseMessageHandler = firebaseMessageHandler;
+            prefs = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
+            String roomKey = prefs.getString("room key", "");
+            if (!roomKey.equals("")) {
+                mMessageDatabaseReference = mFirebaseDatabase.getReference().child(roomKey).child("messages");
+            } else {
+                Log.e(TAG, "invalid room key");
+            }
+
+        }
+
+        public MessageDatabaseAccess(Context context) {
+            mContext = context;
+            mFirebaseDatabase = FirebaseDatabase.getInstance();
             prefs = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
             String roomKey = prefs.getString("room key", "");
             if (!roomKey.equals("")) {
