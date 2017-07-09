@@ -29,6 +29,7 @@ import com.stream.jerye.queue.MusicPage.MusicFragment;
 import com.stream.jerye.queue.MusicPage.SimpleTrack;
 import com.stream.jerye.queue.firebase.FirebaseEventBus;
 import com.stream.jerye.queue.lobby.LobbyActivity;
+import com.stream.jerye.queue.lobby.User;
 import com.stream.jerye.queue.profile.SpotifyProfile;
 
 import java.util.List;
@@ -48,6 +49,7 @@ public class RoomActivity extends AppCompatActivity implements
     private AnimatedVectorDrawable playToPause;
     private AnimatedVectorDrawable pauseToPlay;
     private FirebaseEventBus.MusicDatabaseAccess mMusicDatabaseAccess;
+    private FirebaseEventBus.UserDatabaseAccess mUserDatabaseAccess;
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -95,8 +97,7 @@ public class RoomActivity extends AppCompatActivity implements
         mToken = prefs.getString("token", "");
 
         mMusicDatabaseAccess = new FirebaseEventBus.MusicDatabaseAccess(this, this);
-        FirebaseEventBus.FirebaseMessagingAccess mFirebaseMessagingAccess = new FirebaseEventBus.FirebaseMessagingAccess();
-        mFirebaseMessagingAccess.sendUpstreamMessage();
+        mUserDatabaseAccess = new FirebaseEventBus.UserDatabaseAccess(this);
 
         playToPause = (AnimatedVectorDrawable) getDrawable(R.drawable.avd_play_to_pause);
         pauseToPlay = (AnimatedVectorDrawable) getDrawable(R.drawable.avd_pause_to_play);
@@ -199,6 +200,9 @@ public class RoomActivity extends AppCompatActivity implements
 
         mProfileName.setText(profileName);
         Picasso.with(this).load(profilePicture).into(mProfilePicture);
+
+        User newUser = new User(profileName,profileId,FirebaseInstanceId.getInstance().getToken());
+        mUserDatabaseAccess.push(newUser);
 
     }
 

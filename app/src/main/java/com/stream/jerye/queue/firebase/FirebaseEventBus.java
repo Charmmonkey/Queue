@@ -9,16 +9,13 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.RemoteMessage;
-import com.stream.jerye.queue.BuildConfig;
 import com.stream.jerye.queue.MessagePage.Message;
 import com.stream.jerye.queue.MusicPage.SimpleTrack;
 import com.stream.jerye.queue.lobby.Room;
+import com.stream.jerye.queue.lobby.User;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by jerye on 6/20/2017.
@@ -26,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class FirebaseEventBus {
     private static FirebaseDatabase mFirebaseDatabase;
-    private static DatabaseReference mMusicDatabaseReference, mMessageDatabaseReference, mRoomDatabaseReference;
+    private static DatabaseReference mMusicDatabaseReference, mMessageDatabaseReference, mRoomDatabaseReference, mUserDatabaseReference;
     private static String TAG = "FirebaseEventBus.java";
 
     public interface FirebasePeekHandler {
@@ -275,21 +272,28 @@ public class FirebaseEventBus {
         }
     }
 
-    public static class FirebaseMessagingAccess{
-        private FirebaseMessaging mFirebaseMessaging;
 
-        public FirebaseMessagingAccess(){
-            mFirebaseMessaging = FirebaseMessaging.getInstance();
+    // Handler interface not necessary since this will be listened to in CFI and handled in the app server.
+    public static class UserDatabaseAccess{
+        private Context mContext;
+        private SharedPreferences prefs;
+
+        public UserDatabaseAccess(Context context){
+            mContext = context;
+            mFirebaseDatabase = FirebaseDatabase.getInstance();
+            prefs = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
+            String roomKey = prefs.getString("room key", "");
+            if (!roomKey.equals("")) {
+                mUserDatabaseReference = mFirebaseDatabase.getReference().child(roomKey).child("users");
+            } else {
+                Log.e(TAG, "invalid room key");
+            }
         }
 
-        public void sendUpstreamMessage(){
-            AtomicInteger msgId = new AtomicInteger();
-            mFirebaseMessaging.send(new RemoteMessage.Builder(BuildConfig.FIREBASE_SENDER_ID + "@gcm.googleapis.com")
-                    .setMessageId(Integer.toString(msgId.incrementAndGet()))
-                    .addData("my_message", "Hello World")
-                    .addData("my_action","SAY_HELLO")
-                    .build());
+        public void push(User user ){
+            mUserDatabaseReference.push().setValue(user);
         }
+
     }
 
 }
