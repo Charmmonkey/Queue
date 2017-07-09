@@ -11,7 +11,6 @@ public class Search {
 
         void addData(List<Track> items);
 
-        void onTrackSelected(SimpleTrack simpleTrack);
     }
 
     public interface ActionListener {

@@ -1,7 +1,5 @@
 package com.stream.jerye.queue.MusicPage;
 
-import android.util.Log;
-
 import kaaes.spotify.webapi.android.models.ArtistSimple;
 import kaaes.spotify.webapi.android.models.Track;
 
@@ -29,8 +27,9 @@ public class SimpleTrack {
         for(ArtistSimple artistSimple : track.artists){
             artists = artists + artistSimple.name + ", " ;
         }
-        this.artistName = artists.substring(0,artists.length()-3);
-        Log.d("SimpleTrack", this.artistName);
+        if(track.artists.size()>1){
+            this.artistName = artists.substring(0,artists.length()-2);
+        }
         this.albumImage = track.album.images.get(0).url;
         this.durationInMS = track.duration_ms;
     }

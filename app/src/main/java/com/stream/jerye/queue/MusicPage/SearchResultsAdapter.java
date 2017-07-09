@@ -27,6 +27,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
     private final List<Track> mItems = new ArrayList<>();
     private final Context mContext;
     private final ItemSelectedListener mListener;
+    private String TAG = "SearchResultsAdapter";
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
@@ -60,6 +61,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
 
     public void clearData() {
         mItems.clear();
+        notifyDataSetChanged();
     }
 
     public void addData(List<Track> items) {

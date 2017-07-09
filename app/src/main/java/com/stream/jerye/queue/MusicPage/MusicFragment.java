@@ -4,6 +4,8 @@ package com.stream.jerye.queue.MusicPage;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,8 +15,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.stream.jerye.queue.firebase.FirebaseEventBus;
 import com.stream.jerye.queue.R;
+import com.stream.jerye.queue.firebase.FirebaseEventBus;
 
 import java.util.List;
 
@@ -36,6 +38,9 @@ public class MusicFragment extends Fragment implements Search.View, FirebaseEven
     private String TAG = "MainActivity.java";
     private String mSpotifyAccessToken;
     private FirebaseEventBus.MusicDatabaseAccess mMusicDatabaseAccess;
+    private Handler mainHandler = new Handler(Looper.getMainLooper());
+    private Runnable runnable;
+
 
     @BindView(R.id.search_view)
     SearchView mSearchView;
@@ -89,9 +94,21 @@ public class MusicFragment extends Fragment implements Search.View, FirebaseEven
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
-                mActionListener.search(newText);
-                mMusicResultsList.setVisibility(View.VISIBLE);
+            public boolean onQueryTextChange(final String newText) {
+                if(!newText.equals("")){
+                    mMusicResultsList.setVisibility(View.VISIBLE);
+
+                    mainHandler.removeCallbacks(runnable);
+                    runnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.d(TAG, "text changed trigger: " + newText);
+                            mActionListener.search(newText);
+                        }
+                    };
+                    mainHandler.postDelayed(runnable,150);
+                }
+
                 return true;
             }
         });
@@ -100,8 +117,10 @@ public class MusicFragment extends Fragment implements Search.View, FirebaseEven
             public void onFocusChange(View v, boolean hasFocus) {
                 if(!hasFocus){
                     mMusicResultsList.setVisibility(View.GONE);
+                    mMusicQueueList.setVisibility(View.VISIBLE);
                 }else{
                     mMusicResultsList.setVisibility(View.VISIBLE);
+                    mMusicQueueList.setVisibility(View.GONE);
                 }
             }
         });
@@ -110,9 +129,12 @@ public class MusicFragment extends Fragment implements Search.View, FirebaseEven
         mSearchResultsAdapter = new SearchResultsAdapter(getContext(), new SearchResultsAdapter.ItemSelectedListener() {
             @Override
             public void onItemSelected(View itemView, Track item) {
-                mActionListener.selectTrack(item);
+                Log.d(TAG, "result item selected");
+                SimpleTrack simpleTrack = new SimpleTrack(item);
                 mMusicResultsList.setVisibility(View.GONE);
+                mMusicDatabaseAccess.push(simpleTrack);
                 mSearchView.setQuery("",false);
+                mSearchResultsAdapter.clearData();
             }
         });
 
@@ -161,12 +183,6 @@ public class MusicFragment extends Fragment implements Search.View, FirebaseEven
         mSearchResultsAdapter.addData(items);
     }
 
-    @Override
-    public void onTrackSelected(SimpleTrack simpleTrack) {
-        Log.d("MainActivity.java", "onTrackSelected");
-        mMusicDatabaseAccess.push(simpleTrack);
-
-    }
 
     @Override
     public void enqueue(SimpleTrack simpleTrack) {

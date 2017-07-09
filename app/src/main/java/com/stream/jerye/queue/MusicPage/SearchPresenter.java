@@ -101,15 +101,7 @@ public class SearchPresenter implements Search.ActionListener {
 
     @Override
     public void selectTrack(Track item) {
-        SimpleTrack simpleTrack = new SimpleTrack(item);
-
-        if (simpleTrack != null) {
-            mView.onTrackSelected(simpleTrack);
-            return;
-        }else{
-            Toast.makeText(mContext, "Could not find song", Toast.LENGTH_SHORT).show();
-        }
-
+        mView.reset();
     }
 
     private void logError(String msg) {
