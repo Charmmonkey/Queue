@@ -28,21 +28,22 @@
 
         <service android:name=".PlayerService" />
 
+
+
         <receiver android:name=".widget.QueueWidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.stream.jerye.queue.firebase.ACTION_DATA_UPDATED"/>
             </intent-filter>
-
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/queue_widget_info" />
         </receiver>
-        <!-- <service -->
-        <!-- android:name=".MyFirebaseMessagingService"> -->
-        <!-- <intent-filter> -->
-        <!-- <action android:name="com.google.firebase.MESSAGING_EVENT"/> -->
-        <!-- </intent-filter> -->
-        <!-- </service> -->
+
+        <service android:name=".widget.QueueWidgetRemoteService"
+            android:permission="android.permission.BIND_REMOTEVIEWS"
+            />
+
         <service android:name=".firebase.QueueFirebaseInstanceIdService">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
@@ -54,17 +55,11 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
         </service>
-        <!--
-     Set custom default icon. This is used when no icon is set for incoming notification messages.
-     See README(https://goo.gl/l4GJaQ) for more.
-        -->
+
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_notifications_black_24dp" />
-        <!--
-             Set color used with incoming notification messages. This is used when no color is set for the incoming
-             notification message. See README(https://goo.gl/6BKBk7) for more.
-        -->
+
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/colorAccent" />

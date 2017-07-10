@@ -1,6 +1,7 @@
 package com.stream.jerye.queue.firebase;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 
@@ -48,6 +49,7 @@ public class FirebaseEventBus {
         private FirebaseQueueAdapterHandler mFirebaseQueueAdapterHandler;
         private Context mContext;
         private SharedPreferences prefs;
+        public static final String ACTION_DATA_UPDATED = "com.stream.jerye.queue.firebase.ACTION_DATA_UPDATED";
 
         public MusicDatabaseAccess(Context context, FirebasePeekHandler firebasePeekHandler) {
             mContext = context;
@@ -87,6 +89,40 @@ public class FirebaseEventBus {
                     SimpleTrack simpleTrack = dataSnapshot.getValue(SimpleTrack.class);
                     simpleTrack.setKey(dataSnapshot.getKey());
                     mFirebaseQueueAdapterHandler.enqueue(simpleTrack);
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+
+        // Different from childEventListener because we don't want duplicate Broadcasts from app and widget.
+        public void addWidgetUpdater() {
+            mMusicDatabaseReference.addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    SimpleTrack simpleTrack = dataSnapshot.getValue(SimpleTrack.class);
+                    simpleTrack.setKey(dataSnapshot.getKey());
+                    mFirebaseQueueAdapterHandler.enqueue(simpleTrack);
+                    Intent dataUpdatedIntent = new Intent(ACTION_DATA_UPDATED);
+                    mContext.sendBroadcast(dataUpdatedIntent);
                 }
 
                 @Override
@@ -288,11 +324,11 @@ public class FirebaseEventBus {
 
 
     // Handler interface not necessary since this will be listened to in CFI and handled in the app server.
-    public static class UserDatabaseAccess{
+    public static class UserDatabaseAccess {
         private Context mContext;
         private SharedPreferences prefs;
 
-        public UserDatabaseAccess(Context context){
+        public UserDatabaseAccess(Context context) {
             mContext = context;
             mFirebaseDatabase = FirebaseDatabase.getInstance();
             prefs = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
@@ -304,7 +340,7 @@ public class FirebaseEventBus {
             }
         }
 
-        public void push(User user ){
+        public void push(User user) {
             mUserDatabaseReference.push().setValue(user);
         }
 

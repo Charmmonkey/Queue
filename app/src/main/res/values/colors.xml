@@ -6,6 +6,6 @@
 
     <color name="background_light">#FAFAFA</color>
     <color name="gray_accent">#E0E0E0</color>
-    <color name="background_color">#B3E5FC</color>
+    <color name="background_color">#80B3E5FC</color>
     <color name="white_translucent">#CCFAFAFA</color>
 </resources>

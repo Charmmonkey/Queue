@@ -102,8 +102,6 @@ public class RoomActivity extends AppCompatActivity implements
         playToPause = (AnimatedVectorDrawable) getDrawable(R.drawable.avd_play_to_pause);
         pauseToPlay = (AnimatedVectorDrawable) getDrawable(R.drawable.avd_pause_to_play);
 
-        bindService(PlayerService.getIntent(this), mServiceConnection, Activity.BIND_AUTO_CREATE);
-
         mPager.setAdapter(new SimpleFragmentPageAdapter(getSupportFragmentManager()));
 
         SpotifyProfile spotifyProfile = new SpotifyProfile(this, mToken);
@@ -115,6 +113,13 @@ public class RoomActivity extends AppCompatActivity implements
         } catch (NullPointerException nullPointerException) {
             nullPointerException.printStackTrace();
         }
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        bindService(PlayerService.getIntent(this), mServiceConnection, Activity.BIND_AUTO_CREATE);
 
     }
 
@@ -201,7 +206,7 @@ public class RoomActivity extends AppCompatActivity implements
         mProfileName.setText(profileName);
         Picasso.with(this).load(profilePicture).into(mProfilePicture);
 
-        User newUser = new User(profileName,profileId,FirebaseInstanceId.getInstance().getToken());
+        User newUser = new User(profileName, profileId, FirebaseInstanceId.getInstance().getToken());
         mUserDatabaseAccess.push(newUser);
 
     }
