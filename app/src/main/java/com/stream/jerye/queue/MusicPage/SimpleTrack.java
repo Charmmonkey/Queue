@@ -24,12 +24,10 @@ public class SimpleTrack {
         this.name = track.name;
 
         String artists = "";
-        for(ArtistSimple artistSimple : track.artists){
-            artists = artists + artistSimple.name + ", " ;
+        for (ArtistSimple artistSimple : track.artists) {
+            artists = artists + artistSimple.name + ", ";
         }
-        if(track.artists.size()>1){
-            this.artistName = artists.substring(0,artists.length()-2);
-        }
+        this.artistName = artists.substring(0, artists.length() - 2);
         this.albumImage = track.album.images.get(0).url;
         this.durationInMS = track.duration_ms;
     }
@@ -74,9 +72,11 @@ public class SimpleTrack {
         this.albumImage = albumImage;
     }
 
-    public long getDurationInMS(){
+    public long getDurationInMS() {
         return durationInMS;
     }
 
-    public void setDurationInMS(long durationInMS){this.durationInMS = durationInMS;}
+    public void setDurationInMS(long durationInMS) {
+        this.durationInMS = durationInMS;
+    }
 }

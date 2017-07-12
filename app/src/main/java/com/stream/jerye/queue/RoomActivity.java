@@ -30,7 +30,7 @@ import com.stream.jerye.queue.MusicPage.SimpleTrack;
 import com.stream.jerye.queue.firebase.FirebaseEventBus;
 import com.stream.jerye.queue.lobby.LobbyActivity;
 import com.stream.jerye.queue.lobby.User;
-import com.stream.jerye.queue.profile.SpotifyProfile;
+import com.stream.jerye.queue.profile.SpotifyProfileAsyncTask;
 
 import java.util.List;
 
@@ -41,7 +41,7 @@ import kaaes.spotify.webapi.android.models.UserPrivate;
 public class RoomActivity extends AppCompatActivity implements
         MusicPlayerListener,
         FirebaseEventBus.FirebasePeekHandler,
-        SpotifyProfile.SpotifyProfileCallback {
+        SpotifyProfileAsyncTask.SpotifyProfileCallback {
     private QueuePlayer mPlayer;
     private String TAG = "MainActivity.java";
     private static SharedPreferences prefs;
@@ -104,8 +104,8 @@ public class RoomActivity extends AppCompatActivity implements
 
         mPager.setAdapter(new SimpleFragmentPageAdapter(getSupportFragmentManager()));
 
-        SpotifyProfile spotifyProfile = new SpotifyProfile(this, mToken);
-        spotifyProfile.getUserProfile();
+        SpotifyProfileAsyncTask asyncTask = new SpotifyProfileAsyncTask(this, this, mToken);
+        asyncTask.execute();
 
         Bundle bundle = getIntent().getExtras();
         try {
@@ -152,8 +152,6 @@ public class RoomActivity extends AppCompatActivity implements
                     mPlayButton.setImageDrawable(playToPause);
                     playToPause.start();
                 }
-
-
             }
         });
 

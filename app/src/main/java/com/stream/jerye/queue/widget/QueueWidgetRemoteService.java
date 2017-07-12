@@ -71,7 +71,7 @@ public class QueueWidgetRemoteService extends RemoteViewsService {
 
         @Override
         public RemoteViews getViewAt(int position) {
-            Log.d(TAG, "getViewAt");
+            Log.d(TAG, "getViewAt: " + position);
 
             SimpleTrack track = mList.get(position);
             String imageUrl = track.getAlbumImage();

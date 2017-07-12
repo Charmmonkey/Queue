@@ -35,6 +35,8 @@ public class LobbyActivity extends AppCompatActivity {
     ImageView mJoinRoomButton;
 
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,13 +44,17 @@ public class LobbyActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         prefs = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
         roomKey = prefs.getString("room key", "");
         if(!roomKey.equals("")){
             mJoinRoomButton.setImageDrawable(getDrawable(R.drawable.ic_refresh_black_24dp));
         }
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
@@ -102,5 +108,10 @@ public class LobbyActivity extends AppCompatActivity {
         AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
     }
 
+    public void clearRoomPreference(View v){
+        prefs.edit().putString("room key", "").apply();
+        roomKey = "";
+        mJoinRoomButton.setImageDrawable(getDrawable(R.drawable.ic_play));
+    }
 
 }

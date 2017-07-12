@@ -6,6 +6,7 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
@@ -83,6 +84,7 @@ public class CreateRoomDiaglog extends DialogFragment {
                     mRoomTitle = roomTitleEditText.getText().toString();
                     mRoomPassword = roomPasswordEditText.getText().toString();
 
+                    Log.d("Dialog", mRoomTitle + mRoomPassword);
                     if (!mRoomTitle.equals("")) {
 
                         FirebaseEventBus.RoomDatabaseAccess roomDatabaseAccess = new FirebaseEventBus.RoomDatabaseAccess(getActivity());

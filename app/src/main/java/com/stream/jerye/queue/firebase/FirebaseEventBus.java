@@ -40,7 +40,7 @@ public class FirebaseEventBus {
     }
 
     public interface FirebaseRoomInfoHandler {
-        void checkPassword(String password);
+        void getRooms(Room room);
     }
 
 
@@ -291,12 +291,13 @@ public class FirebaseEventBus {
             mRoomDatabaseReference.child(roomKey).setValue(newRoom);
         }
 
-        public void getPassword() {
-            mRoomDatabaseReference.orderByChild("password").addChildEventListener(new ChildEventListener() {
+        public void getRooms() {
+            mRoomDatabaseReference.orderByKey().addChildEventListener(new ChildEventListener() {
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    String string = (String) dataSnapshot.getValue();
-                    mFirebaseRoomInfoHandler.checkPassword(string);
+                    Room room = dataSnapshot.getValue(Room.class);
+                    room.setRoomKey(dataSnapshot.getKey());
+                    mFirebaseRoomInfoHandler.getRooms(room);
                 }
 
                 @Override

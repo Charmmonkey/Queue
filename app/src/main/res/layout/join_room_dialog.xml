@@ -13,7 +13,7 @@
         android:src="@drawable/ic_play" />
 
     <EditText
-        android:id="@+id/room_title"
+        android:id="@+id/dialog_join_room_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="4dp"
@@ -24,7 +24,7 @@
         android:inputType="textEmailAddress" />
 
     <EditText
-        android:id="@+id/room_password"
+        android:id="@+id/dialog_join_room_password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
