@@ -32,15 +32,13 @@ import com.stream.jerye.queue.lobby.LobbyActivity;
 import com.stream.jerye.queue.lobby.User;
 import com.stream.jerye.queue.profile.SpotifyProfileAsyncTask;
 
-import java.util.List;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import kaaes.spotify.webapi.android.models.UserPrivate;
 
 public class RoomActivity extends AppCompatActivity implements
         MusicPlayerListener,
-        FirebaseEventBus.FirebasePeekHandler,
+        FirebaseEventBus.FirebaseQueueAdapterHandler,
         SpotifyProfileAsyncTask.SpotifyProfileCallback {
     private QueuePlayer mPlayer;
     private String TAG = "MainActivity.java";
@@ -56,7 +54,8 @@ public class RoomActivity extends AppCompatActivity implements
             Log.d(TAG, "Service Connected");
             mPlayer = ((PlayerService.PlayerBinder) service).getService(RoomActivity.this, RoomActivity.this, mToken);
             Log.d(TAG, "peeking from activity result");
-            mMusicDatabaseAccess.peek();
+//            mMusicDatabaseAccess.peek();
+            mMusicDatabaseAccess.addChildListener();
         }
 
         @Override
@@ -238,10 +237,10 @@ public class RoomActivity extends AppCompatActivity implements
     }
 
 
-    @Override
-    public void peekedResult(List<SimpleTrack> list) {
-        mPlayer.setNextTrack(list);
-    }
+//    @Override
+//    public void peekedResult(List<SimpleTrack> list) {
+//        mPlayer.setNextTrack(list);
+//    }
 
     @Override
     public void getSongProgress(int positionInMs) {
@@ -263,13 +262,17 @@ public class RoomActivity extends AppCompatActivity implements
         mMusicDuration.setText(minutes + ":" + (seconds < 10 ? "0" : "") + seconds);
     }
 
-    @Override
-    public void queueNextSong(SimpleTrack oldTrackToRemove) {
-        Log.d(TAG, "queueNextSong called from player context end");
-        mMusicDatabaseAccess.remove(oldTrackToRemove);
-        mMusicDatabaseAccess.peek();
-    }
+//    @Override
+//    public void queueNextSong(SimpleTrack oldTrackToRemove) {
+//        Log.d(TAG, "queueNextSong called from player context end");
+//        mMusicDatabaseAccess.remove(oldTrackToRemove);
+//        mMusicDatabaseAccess.peek();
+//    }
 
+    @Override
+    public void enqueue(SimpleTrack simpleTrack) {
+        mPlayer.addTrack(simpleTrack);
+    }
 
     @Override
     protected void onStop() {

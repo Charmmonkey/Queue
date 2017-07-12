@@ -17,6 +17,7 @@ import com.spotify.sdk.android.player.Spotify;
 import com.stream.jerye.queue.MusicPage.SimpleTrack;
 import com.stream.jerye.queue.lobby.LobbyActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -29,8 +30,6 @@ public class MultiMediaPlayer implements QueuePlayer,
     private static final String TAG = MultiMediaPlayer.class.getSimpleName();
 
     private MediaPlayer mMediaPlayer;
-    private SimpleTrack mCurrentTrack;
-    private SimpleTrack mNextTrack;
     private Player mSpotifyPlayer;
     private String mSpotifyAccessToken;
     private MusicPlayerListener mMusicPlayerListener;
@@ -40,6 +39,8 @@ public class MultiMediaPlayer implements QueuePlayer,
     private int mPositionInMs;
     private static boolean spotifyPlayerIsPlaying = false;
     private static boolean spotifyPlayerIsPaused = false;
+    private List<SimpleTrack> mList = new ArrayList<>();
+    private int num = -1;
 
 
     private static final int GENERAL_AUDIO_URL = 1;
@@ -72,7 +73,6 @@ public class MultiMediaPlayer implements QueuePlayer,
         if (mSpotifyPlayer != null) {
             mSpotifyPlayer.pause();
         }
-        Log.d("MainActivity.java", "creating spotify player " + mCurrentTrack);
 
         createSpotifyAudioPlayer();
 
@@ -89,11 +89,11 @@ public class MultiMediaPlayer implements QueuePlayer,
 
     @Override
     public void release() {
-        if (mMediaPlayer != null) {
-            mMediaPlayer.release();
-            mMediaPlayer = null;
+        if (mSpotifyPlayer != null) {
+            mSpotifyPlayer.shutdown();
+            mSpotifyPlayer = null;
         }
-        mCurrentTrack = null;
+        num = -1;
     }
 
     @Override
@@ -112,10 +112,13 @@ public class MultiMediaPlayer implements QueuePlayer,
 
     @Override
     public void next() {
-        if (mSpotifyPlayer != null && mCurrentTrack != null) {
-            playTrack(mNextTrack);
-            mMusicPlayerListener.queueNextSong(mCurrentTrack);
-        }
+        nextSong();
+
+    }
+
+    @Override
+    public void addTrack(SimpleTrack newTrack) {
+        mList.add(newTrack);
     }
 
     @Override
@@ -126,13 +129,6 @@ public class MultiMediaPlayer implements QueuePlayer,
     @Override
     public boolean isPaused() {
         return mSpotifyPlayer != null && (!spotifyPlayerIsPlaying && spotifyPlayerIsPaused);
-    }
-
-    @Override
-    public void setNextTrack(List<SimpleTrack> currentAndNextSong) {
-        mCurrentTrack = currentAndNextSong.get(0);
-        mNextTrack = currentAndNextSong.get(1);
-
     }
 
 
@@ -171,7 +167,8 @@ public class MultiMediaPlayer implements QueuePlayer,
     @Override
     public void onLoggedIn() {
         Log.d(TAG, "logged in");
-        playTrack(mCurrentTrack);
+        num = 0;
+        playTrack(mList.get(num));
         mHandler = new Handler(Looper.getMainLooper());
         mMediaObserver = new MediaObserver();
 
@@ -212,8 +209,9 @@ public class MultiMediaPlayer implements QueuePlayer,
             spotifyPlayerIsPlaying = false;
             mMediaObserver.stop();
         } else if (eventType.equals(EventType.END_OF_CONTEXT)) {
-            playTrack(mNextTrack);
-            mMusicPlayerListener.queueNextSong(mCurrentTrack);
+//            playTrack(mCurrentTrack);
+//            mMusicPlayerListener.queueNextSong(mNextTrack);
+            nextSong();
         }
     }
 
@@ -252,4 +250,14 @@ public class MultiMediaPlayer implements QueuePlayer,
         mMusicPlayerListener.getSongDuration((int) track.getDurationInMS());
         Log.d(TAG, "duration: " + track.getDurationInMS());
     }
+
+    private void nextSong() {
+        if(num < mList.size() -1 && num != -1){
+            num = num + 1;
+            playTrack(mList.get(num));
+        }
+
+    }
+
+
 }

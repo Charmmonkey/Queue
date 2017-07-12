@@ -2,8 +2,6 @@ package com.stream.jerye.queue;
 
 import com.stream.jerye.queue.MusicPage.SimpleTrack;
 
-import java.util.List;
-
 public interface QueuePlayer {
 
     void play();
@@ -22,7 +20,7 @@ public interface QueuePlayer {
 
     void release();
 
-    void setNextTrack(List<SimpleTrack> currentAndNextSong);
+    void addTrack(SimpleTrack newTrack);
 
 
 }
