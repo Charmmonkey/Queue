@@ -1,4 +1,4 @@
-package com.stream.jerye.queue.MessagePage;
+package com.stream.jerye.queue.messagePage;
 
 /**
  * Created by jerye on 6/12/2017.

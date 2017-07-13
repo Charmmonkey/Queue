@@ -19,7 +19,7 @@ public class QueueFirebaseMessagingService extends FirebaseMessagingService {
             Log.d(TAG, msg);
 
             FirebaseEventBus.MessageDatabaseAccess mMessageDatabaseAccess = new FirebaseEventBus.MessageDatabaseAccess(this);
-            mMessageDatabaseAccess.push(msg,"");
+            mMessageDatabaseAccess.push(msg,"SYSTEM ANNOUNCEMENT");
         }
     }
 

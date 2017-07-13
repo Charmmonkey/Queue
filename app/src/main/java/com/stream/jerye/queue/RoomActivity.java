@@ -24,9 +24,9 @@ import android.widget.TextView;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.squareup.picasso.Picasso;
-import com.stream.jerye.queue.MessagePage.MessageFragment;
-import com.stream.jerye.queue.MusicPage.MusicFragment;
-import com.stream.jerye.queue.MusicPage.SimpleTrack;
+import com.stream.jerye.queue.messagePage.MessageFragment;
+import com.stream.jerye.queue.musicPage.MusicFragment;
+import com.stream.jerye.queue.musicPage.SimpleTrack;
 import com.stream.jerye.queue.firebase.FirebaseEventBus;
 import com.stream.jerye.queue.lobby.LobbyActivity;
 import com.stream.jerye.queue.lobby.User;
@@ -204,6 +204,9 @@ public class RoomActivity extends AppCompatActivity implements
         Picasso.with(this).load(profilePicture).into(mProfilePicture);
 
         User newUser = new User(profileName, profileId, FirebaseInstanceId.getInstance().getToken());
+
+        // Check if user is unique first
+
         mUserDatabaseAccess.push(newUser);
 
     }

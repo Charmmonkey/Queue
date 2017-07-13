@@ -1,4 +1,4 @@
-package com.stream.jerye.queue.MessagePage;
+package com.stream.jerye.queue.messagePage;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -51,6 +51,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             holder.messageContent.setTextColor(Color.WHITE);
             holder.messageContent.setLayoutParams(params);
             holder.messageContent.setBackground(ContextCompat.getDrawable(mContext, R.drawable.message_bubble_me));
+        }else if(name.equals("SYSTEM ANNOUNCEMENT") ){
+            holder.messageName.setVisibility(View.GONE);
+            holder.messageContent.setBackgroundColor(ContextCompat.getColor(mContext,R.color.white_translucent));
         }
     }
 
@@ -86,6 +89,5 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             messageContent = (TextView) view.findViewById(R.id.message_content);
         }
 
-        ;
     }
 }
